@@ -14,7 +14,7 @@ import { Avatar, Typography } from "@mui/material";
 import { fetch_applications } from "./services/application_service";
 import type { Application } from "./services/application_service";
 import JobForm from "./JobForm";
-
+import JobWindow from "./JobWindow";
 function App() {
   useEffect(() => {
     fetch_applications().then((data: Application[]) => {
@@ -73,6 +73,9 @@ function App() {
     setjobs([...jobs, job]);
   }
 
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [jobWindowOpen, setJobWindowOpen] = useState(false);
+
   return (
     <Container maxWidth="sm">
       <div className="App">
@@ -105,6 +108,13 @@ function App() {
           open={addformShow}
           addJob={addJob}
           close={() => setAddFormShow(false)}
+        />
+        <JobWindow
+          open={jobWindowOpen}
+          onClose={() => {
+            setJobWindowOpen(false);
+          }}
+          job={selectedJob}
         />
         <Box
           sx={{ display: "flex", flexDirection: "row", h: "100%", w: "100%" }}
@@ -160,6 +170,10 @@ function App() {
                     width: "235px",
                     mt: "20px",
                     borderRadius: "20px",
+                  }}
+                  onClick={() => {
+                    setSelectedJob(job);
+                    setJobWindowOpen(true);
                   }}
                 >
                   <Box
