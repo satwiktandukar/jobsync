@@ -10,7 +10,7 @@ import Drawer from "@mui/material/Drawer";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Paper from "@mui/material/Paper";
-import { Avatar, Typography } from "@mui/material";
+import { Avatar, CssBaseline, Toolbar, Typography } from "@mui/material";
 import { fetch_applications } from "./services/application_service";
 import type { Application } from "./services/application_service";
 import JobForm from "./JobForm";
@@ -78,6 +78,7 @@ function App() {
 
   return (
     <Container maxWidth="sm">
+      <CssBaseline />
       <div className="App">
         <AppBar
           sx={{
@@ -89,20 +90,22 @@ function App() {
             backgroundColor: "transparent",
           }}
         >
-          <Button
-            color="inherit"
-            startIcon={<ArrowDropDownIcon />}
-            sx={{ width: "100px", borderRadius: 12 }}
-          >
-            Software Engineering
-          </Button>
-          <Button
-            color="inherit"
-            startIcon={<ArrowDropDownIcon />}
-            sx={{ width: "100px", borderRadius: 12 }}
-          >
-            Cybersecurity
-          </Button>
+          <Container sx={{ height: "100%" }}>
+            <Button
+              color="inherit"
+              startIcon={<ArrowDropDownIcon />}
+              sx={{ width: "200px", borderRadius: 12 }}
+            >
+              Software Engineering
+            </Button>
+            <Button
+              color="inherit"
+              startIcon={<ArrowDropDownIcon />}
+              sx={{ width: "200px", borderRadius: 12, height: "100%" }}
+            >
+              Cybersecurity
+            </Button>
+          </Container>
         </AppBar>
         <JobForm
           open={addformShow}
@@ -121,14 +124,21 @@ function App() {
         >
           <Card
             sx={{
-              height: "500px",
-              width: "240px",
+              height: "800px",
+              width: "300px",
               margin: "20px",
               overflowY: "scroll",
               scrollbarWidth: "none",
               "&::-webkit-scrollbar": {
                 display: "none",
               },
+              backdropFilter: "blur(10px)",
+              backgroundColor: "rgb(226, 226, 226)",
+              borderRadius: "20px",
+
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
             }}
           >
             <Box
@@ -155,7 +165,8 @@ function App() {
               <Typography variant="h5">WishList</Typography>
               <Button
                 variant="contained"
-                sx={{ mt: "10px", backgroundColor: "#0FFF1B" }}
+                color="success"
+                sx={{ mt: "10px", borderRadius: 12 }}
                 onClick={() => setAddFormShow(true)}
               >
                 + Add{" "}
@@ -167,9 +178,10 @@ function App() {
                   elevation={3}
                   sx={{
                     height: "80px",
-                    width: "235px",
+                    width: "280px",
                     mt: "20px",
                     borderRadius: "20px",
+                    cursor: "pointer",
                   }}
                   onClick={() => {
                     setSelectedJob(job);
@@ -187,7 +199,7 @@ function App() {
                   >
                     <Box
                       sx={{
-                        width: "155px",
+                        width: "100%",
                         display: "flex",
                         flexDirection: "row",
                         gap: "10px",

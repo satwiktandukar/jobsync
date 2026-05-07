@@ -1,3 +1,12 @@
+import { Label } from "@mui/icons-material";
+import {
+  Backdrop,
+  Box,
+  Button,
+  Container,
+  TextField,
+  Typography,
+} from "@mui/material";
 import Modal from "@mui/material/Modal";
 import { useState } from "react";
 
@@ -41,9 +50,30 @@ export default function JobForm({ open, addJob, close }: JobFormProps) {
   };
 
   return (
-    <Modal open={open} onClose={close}>
-      <div>
-        <h2>Job Form</h2>
+    <Modal
+      open={open}
+      onClose={close}
+      slotProps={{
+        backdrop: {
+          sx: {
+            backgroundColor: "rgba(0, 0, 0, 0.83)",
+          },
+        },
+      }}
+    >
+      <Container
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          flexDirection: "column",
+          color: "white",
+        }}
+      >
+        <Box sx={{ padding: "20px" }}>
+          <Typography variant="h4" id="modal-modal-title">
+            Job Form
+          </Typography>
+        </Box>
         <form
           onSubmit={(e: React.FormEvent) => {
             e.preventDefault();
@@ -51,60 +81,98 @@ export default function JobForm({ open, addJob, close }: JobFormProps) {
             close();
           }}
         >
-          <label>
-            Company:
-            <input
-              type="text"
-              name="company"
-              value={data.company}
-              onChange={handleChange}
-            />
-          </label>
-          <br />
-          <label>
-            Role:
-            <input
-              type="text"
-              name="title"
-              value={data.title}
-              onChange={handleChange}
-            />
-          </label>
-          <br />
-
-          <label>Location</label>
-          <input
-            type="text"
-            name="location"
-            value={data.location}
+          <TextField
+            name="title"
+            label="Job Title"
             onChange={handleChange}
+            sx={{
+              input: { color: "white" },
+              label: { color: "white" },
+              paddingBottom: "10px",
+            }}
+            fullWidth
           />
-
-          <br />
-          <label>
-            salary:
-            <input
-              type="number"
-              name="salary"
-              value={data.salary}
-              onChange={handleChange}
-            />
-          </label>
-          <br />
-
-          <label>
-            Notes:
-            <textarea
-              name="description"
-              value={data.description}
-              onChange={handleChange}
-            ></textarea>
-          </label>
-          <br />
-          <label></label>
-          <button type="submit">Submit</button>
+          <TextField
+            name="company"
+            label="Company"
+            onChange={handleChange}
+            sx={{
+              input: { color: "white" },
+              label: { color: "white" },
+              paddingBottom: "10px",
+            }}
+            fullWidth
+          />
+          <TextField
+            name="location"
+            label="Location"
+            onChange={handleChange}
+            sx={{
+              input: { color: "white" },
+              label: { color: "white" },
+              paddingBottom: "10px",
+            }}
+            fullWidth
+          />
+          <TextField
+            name="salary"
+            label="Salary"
+            onChange={handleChange}
+            sx={{
+              input: { color: "white" },
+              label: { color: "white" },
+              paddingBottom: "10px",
+            }}
+            fullWidth
+          />
+          <TextField
+            name="description"
+            label="Description"
+            onChange={handleChange}
+            sx={{
+              input: { color: "white" },
+              label: { color: "white" },
+              paddingBottom: "10px",
+            }}
+            fullWidth
+            multiline
+            rows={4}
+          />
+          <TextField
+            name="category"
+            label="Category"
+            onChange={handleChange}
+            sx={{
+              input: { color: "white" },
+              label: { color: "white" },
+              paddingBottom: "10px",
+            }}
+            fullWidth
+          />
+          <TextField
+            name="logo"
+            label="Logo URL"
+            onChange={handleChange}
+            sx={{
+              input: { color: "white" },
+              label: { color: "white" },
+              paddingBottom: "10px",
+            }}
+            fullWidth
+          />
+          <Box sx={{ padding: "20px" }}>
+            <Button
+              variant="contained"
+              type="submit"
+              color="success"
+              sx={{ borderRadius: "20px" }}
+              fullWidth
+            >
+              Add
+            </Button>
+          </Box>
         </form>
-      </div>
+      </Container>
     </Modal>
   );
 }
