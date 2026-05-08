@@ -9,17 +9,7 @@ import {
 } from "@mui/material";
 import Modal from "@mui/material/Modal";
 import { useState } from "react";
-
-type Job = {
-  id: number;
-  title: string;
-  company: string;
-  location: string;
-  salary: string;
-  description: string;
-  category: "IT" | "Cybersecurity" | "Other"; //more categoeries can be added as needed.
-  logo: string; //perhaps I will have a directory of images user can upload to with the company logo.
-};
+import type { Job } from "../types/Job";
 
 type JobFormProps = {
   open: boolean;

@@ -1,39 +1,24 @@
-import React, { useState, useEffect } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import { useEffect, useState } from "react";
 import "./App.css";
-import Container from "@mui/material/Container";
-import AppBar from "@mui/material/AppBar";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import Button from "@mui/material/Button";
-import Drawer from "@mui/material/Drawer";
+
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import { CssBaseline } from "@mui/material";
 import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import Paper from "@mui/material/Paper";
-import { Avatar, CssBaseline, Toolbar, Typography } from "@mui/material";
+import Container from "@mui/material/Container";
+import Drawer from "@mui/material/Drawer";
+
+import JobForm from "./components/JobForm";
+import JobSection from "./components/JobSection";
+import JobWindow from "./components/JobWindow";
+import Navbar from "./components/Navbar";
+
 import { fetch_applications } from "./services/application_service";
 import type { Application } from "./services/application_service";
-import JobForm from "./JobForm";
-import JobWindow from "./JobWindow";
+import type { Job } from "./types/Job";
+
 function App() {
-  useEffect(() => {
-    fetch_applications().then((data: Application[]) => {
-      console.log(data);
-    });
-  });
-
-  type Job = {
-    id: number;
-    title: string;
-    company: string;
-    location: string;
-    salary: string;
-    description: string;
-    category: "IT" | "Cybersecurity" | "Other"; //more categoeries can be added as needed.
-    logo: string; //perhaps I will have a directory of images user can upload to with the company logo.
-  };
-
   const [addformShow, setAddFormShow] = useState(false);
+
   const [jobs, setjobs] = useState<Job[]>([
     {
       id: 1,
@@ -42,8 +27,8 @@ function App() {
       location: "New York, NY",
       salary: "$60,000 - $80,000",
       description: "An entry-level position for aspiring software developers.",
-      logo: "/path/to/logoA.png",
       category: "IT",
+      logo: null,
     },
     {
       id: 2,
@@ -53,8 +38,8 @@ function App() {
       salary: "$70,000 - $90,000",
       description:
         "Responsible for monitoring and protecting the organization's network.",
-      logo: "/path/to/logoB.png",
       category: "Cybersecurity",
+      logo: null,
     },
     {
       id: 3,
@@ -64,170 +49,67 @@ function App() {
       salary: "$65,000 - $85,000",
       description:
         "Develop and maintain user-facing features using React and TypeScript.",
-      logo: "/path/to/logoC.png",
       category: "IT",
+      logo: null,
     },
   ]);
+
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [jobWindowOpen, setJobWindowOpen] = useState(false);
+
+  useEffect(() => {
+    fetch_applications().then((data: Application[]) => {
+      console.log(data);
+    });
+  });
 
   function addJob(job: Job) {
     setjobs([...jobs, job]);
   }
 
-  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
-  const [jobWindowOpen, setJobWindowOpen] = useState(false);
-
   return (
-    <Container maxWidth="sm">
+    <Container
+      maxWidth={false}
+      disableGutters
+      sx={{
+        overflow: "hidden",
+      }}
+    >
       <CssBaseline />
-      <div className="App">
-        <AppBar
-          sx={{
-            height: "64px",
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "transparent",
-          }}
-        >
-          <Container sx={{ height: "100%" }}>
-            <Button
-              color="inherit"
-              startIcon={<ArrowDropDownIcon />}
-              sx={{ width: "200px", borderRadius: 12 }}
-            >
-              Software Engineering
-            </Button>
-            <Button
-              color="inherit"
-              startIcon={<ArrowDropDownIcon />}
-              sx={{ width: "200px", borderRadius: 12, height: "100%" }}
-            >
-              Cybersecurity
-            </Button>
-          </Container>
-        </AppBar>
+
+      <Box className="App" sx={{ overflow: "hidden" }}>
+        <Navbar />
+
         <JobForm
           open={addformShow}
           addJob={addJob}
           close={() => setAddFormShow(false)}
         />
+
         <JobWindow
           open={jobWindowOpen}
-          onClose={() => {
-            setJobWindowOpen(false);
-          }}
+          onClose={() => setJobWindowOpen(false)}
           job={selectedJob}
         />
-        <Box
-          sx={{ display: "flex", flexDirection: "row", h: "100%", w: "100%" }}
-        >
-          <Card
-            sx={{
-              height: "800px",
-              width: "300px",
-              margin: "20px",
-              overflowY: "scroll",
-              scrollbarWidth: "none",
-              "&::-webkit-scrollbar": {
-                display: "none",
-              },
-              backdropFilter: "blur(10px)",
-              backgroundColor: "rgb(226, 226, 226)",
-              borderRadius: "20px",
 
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            <Box
-              width={"100%"}
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                mt: "10px",
-                mb: "10px",
-              }}
-            >
-              <Avatar src={viteLogo} />
-            </Box>
-            <Box
-              sx={{
-                ml: "10px",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "flex-start",
-              }}
-            >
-              <Typography variant="h5">WishList</Typography>
-              <Button
-                variant="contained"
-                color="success"
-                sx={{ mt: "10px", borderRadius: 12 }}
-                onClick={() => setAddFormShow(true)}
-              >
-                + Add{" "}
-              </Button>
-            </Box>
-            {jobs.map((job) => (
-              <React.Fragment key={job.id}>
-                <Paper
-                  elevation={3}
-                  sx={{
-                    height: "80px",
-                    width: "280px",
-                    mt: "20px",
-                    borderRadius: "20px",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => {
-                    setSelectedJob(job);
-                    setJobWindowOpen(true);
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: "100%",
-                      height: "100%",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: "100%",
-                        display: "flex",
-                        flexDirection: "row",
-                        gap: "10px",
-                      }}
-                    >
-                      <Avatar src={viteLogo} />
-                      <Box sx={{ display: "flex", flexDirection: "Column" }}>
-                        {" "}
-                        <Typography variant="body2">{job.title}</Typography>
-                        <Typography variant="body2" color={"#888888"}>
-                          {job.company}
-                        </Typography>
-                      </Box>
-                    </Box>
-                    <Box
-                      sx={{
-                        width: "80px",
-                        height: "100%",
-                        backgroundColor: "#ff2e2e",
-                        borderRadius: "0 20px 20px 0",
-                      }}
-                    ></Box>{" "}
-                  </Box>
-                </Paper>
-              </React.Fragment>
-            ))}
-          </Card>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            height: "calc(100vh - 80px)",
+            width: "100%",
+          }}
+        >
+          <JobSection
+            title="Wish List"
+            icon={<FavoriteIcon />}
+            jobs={jobs}
+            setSelectedJob={setSelectedJob}
+            setJobWindowOpen={setJobWindowOpen}
+            setAddFormShow={setAddFormShow}
+          />
         </Box>
+
         <Drawer
           variant="permanent"
           PaperProps={{
@@ -238,10 +120,9 @@ function App() {
             },
           }}
         >
-          {" "}
           hello
         </Drawer>
-      </div>
+      </Box>
     </Container>
   );
 }
