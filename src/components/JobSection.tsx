@@ -1,5 +1,4 @@
 import { Card, Box, Typography, Button } from "@mui/material";
-import FavoriteIcon from "@mui/icons-material/Favorite";
 import JobCard from "./JobCard";
 import type { Job } from "../types/Job";
 
@@ -10,6 +9,7 @@ export default function JobSection({
   setSelectedJob,
   setJobWindowOpen,
   setAddFormShow,
+  setSection,
 }: {
   title: string;
   icon: React.ReactNode;
@@ -17,6 +17,7 @@ export default function JobSection({
   setSelectedJob: (job: Job) => void;
   setJobWindowOpen: (open: boolean) => void;
   setAddFormShow: (open: boolean) => void;
+  setSection: (section: string) => void;
 }) {
   return (
     <Card
@@ -33,6 +34,8 @@ export default function JobSection({
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        minWidth: "300px",
+        flexShrink: 0,
       }}
     >
       <Box
@@ -61,7 +64,11 @@ export default function JobSection({
           variant="contained"
           color="success"
           sx={{ mt: "5px", borderRadius: 12 }}
-          onClick={() => setAddFormShow(true)}
+          onClick={() => {
+            setAddFormShow(true);
+            setSection(title);
+            console.log("section: ", title);
+          }}
         >
           + Add{" "}
         </Button>

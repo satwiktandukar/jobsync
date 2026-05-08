@@ -1,6 +1,6 @@
 import { Avatar, Box, Paper, Typography } from "@mui/material";
 import viteLogo from "/img.jpg";
-import type { Job } from "./Job";
+import type { Job } from "../types/Job";
 
 export default function JobCard({
   job,

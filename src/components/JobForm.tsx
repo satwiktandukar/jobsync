@@ -13,7 +13,7 @@ import type { Job } from "../types/Job";
 
 type JobFormProps = {
   open: boolean;
-  addJob: (job: Job) => void;
+  addJob: (job: Job, section: string) => void;
   close: () => void;
 };
 
@@ -67,7 +67,7 @@ export default function JobForm({ open, addJob, close }: JobFormProps) {
         <form
           onSubmit={(e: React.FormEvent) => {
             e.preventDefault();
-            addJob(data);
+            addJob(data, "Wishlist");
             close();
           }}
         >
