@@ -47,6 +47,7 @@ function App() {
   function addJob(job: Job, section: string) {
     switch (section) {
       case "Wish List":
+        console.log("wish list job added");
         setwishlistJobs([...wishlistJobs, job]);
         break;
       case "Applied":

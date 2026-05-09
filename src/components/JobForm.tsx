@@ -15,9 +15,15 @@ type JobFormProps = {
   open: boolean;
   addJob: (job: Job, section: string) => void;
   close: () => void;
+  jobSection: string;
 };
 
-export default function JobForm({ open, addJob, close }: JobFormProps) {
+export default function JobForm({
+  open,
+  addJob,
+  close,
+  jobSection,
+}: JobFormProps) {
   const [data, setData] = useState({
     id: 0,
     title: "",
@@ -67,7 +73,7 @@ export default function JobForm({ open, addJob, close }: JobFormProps) {
         <form
           onSubmit={(e: React.FormEvent) => {
             e.preventDefault();
-            addJob(data, "Wishlist");
+            addJob(data, jobSection);
             close();
           }}
         >
