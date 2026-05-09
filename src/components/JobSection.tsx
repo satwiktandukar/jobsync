@@ -93,6 +93,7 @@ export default function JobSection({
       >
         {jobs.map((job) => (
           <JobCard
+            key={job.id}
             job={job}
             setSelectedJob={setSelectedJob}
             setJobWindowOpen={setJobWindowOpen}

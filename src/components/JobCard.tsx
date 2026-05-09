@@ -1,4 +1,5 @@
 import { Avatar, Box, Paper, Typography } from "@mui/material";
+import { useDraggable } from "@dnd-kit/react";
 import viteLogo from "/img.jpg";
 import type { Job } from "../types/Job";
 
@@ -11,17 +12,24 @@ export default function JobCard({
   setSelectedJob: (job: Job) => void;
   setJobWindowOpen: (open: boolean) => void;
 }) {
+  const { ref } = useDraggable({
+    id: job.id,
+    data: {
+      job,
+    },
+  });
+
   return (
-    <Box key={job.id}>
+    <Box ref={ref}>
       <Paper
         elevation={3}
         sx={{
           height: "80px",
           width: "100%",
           borderRadius: "20px",
-          cursor: "pointer",
+          cursor: "grab",
           flexShrink: 0,
-          // alignItems: "center",
+          overflow: "hidden",
         }}
         onClick={() => {
           setSelectedJob(job);
@@ -33,36 +41,36 @@ export default function JobCard({
             width: "100%",
             height: "100%",
             display: "flex",
-            justifyContent: "center",
             alignItems: "center",
           }}
         >
           <Box
             sx={{
-              width: "100%",
+              flex: 1,
               display: "flex",
               flexDirection: "row",
               gap: "10px",
               alignItems: "center",
+              px: 2,
             }}
           >
             {job.logo ? <Avatar src={job.logo} /> : <Avatar src={viteLogo} />}
-            <Box sx={{ display: "flex", flexDirection: "Column" }}>
-              {" "}
+
+            <Box sx={{ display: "flex", flexDirection: "column" }}>
               <Typography variant="body2">{job.title}</Typography>
-              <Typography variant="body2" color={"#888888"}>
+              <Typography variant="body2" color="#888888">
                 {job.company}
               </Typography>
             </Box>
           </Box>
+
           <Box
             sx={{
               width: "80px",
               height: "100%",
               backgroundColor: "#ff2e2e",
-              borderRadius: "0 20px 20px 0",
             }}
-          ></Box>{" "}
+          />
         </Box>
       </Paper>
     </Box>

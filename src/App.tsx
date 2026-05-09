@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { DragDropProvider } from "@dnd-kit/react";
 import "./App.css";
 
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -22,6 +23,7 @@ import {
   rejected,
   wishlist,
 } from "./demoData";
+import JobCard from "./components/JobCard";
 
 function App() {
   const [addformShow, setAddFormShow] = useState(false);
@@ -37,6 +39,9 @@ function App() {
   const [jobWindowOpen, setJobWindowOpen] = useState(false);
 
   const [section, setSection] = useState<string>("wishlist");
+  const [activeJob, setActiveJob] = useState<Job | null>(null);
+
+  const [isDropped, setIsDropped] = useState(false);
 
   useEffect(() => {
     fetch_applications().then((data: Application[]) => {
@@ -69,110 +74,119 @@ function App() {
   }
 
   return (
-    <Container
-      maxWidth={false}
-      disableGutters
-      sx={{
-        overflow: "hidden",
+    <DragDropProvider
+      onDragEnd={(event) => {
+        if (event.canceled) return;
+
+        const { target } = event.operation;
+        setIsDropped(target?.id === "droppable");
       }}
     >
-      <CssBaseline />
-
-      <Box
-        className="App"
+      {" "}
+      <Container
+        maxWidth={false}
+        disableGutters
         sx={{
-          overflow: "hidden",
-          scrollbarWidth: "none",
-          "&::-webkit-scrollbar": {
-            display: "none",
-          },
+          overflow: "visible",
         }}
       >
-        <Navbar />
-
-        <JobForm
-          open={addformShow}
-          addJob={addJob}
-          jobSection={section}
-          close={() => setAddFormShow(false)}
-        />
-
-        <JobWindow
-          open={jobWindowOpen}
-          onClose={() => setJobWindowOpen(false)}
-          job={selectedJob}
-        />
+        <CssBaseline />
 
         <Box
-          className="hide-scrollbar"
+          className="App"
           sx={{
-            display: "flex",
-            flexDirection: "row",
-            height: "calc(100vh - 120px)",
-            width: "100%",
-            overflowX: "auto",
-            overflowY: "hidden",
-            px: "20px",
-            gap: "16px",
+            overflow: "visible",
+            scrollbarWidth: "none",
+            "&::-webkit-scrollbar": {
+              display: "none",
+            },
           }}
         >
-          <JobSection
-            title="Wish List"
-            icon={<FavoriteIcon />}
-            jobs={wishlistJobs}
-            setSelectedJob={setSelectedJob}
-            setJobWindowOpen={setJobWindowOpen}
-            setAddFormShow={setAddFormShow}
-            setSection={setSection}
-          />
-          <JobSection
-            title="Applied"
-            icon={<FavoriteIcon />}
-            jobs={appliedJobs}
-            setSelectedJob={setSelectedJob}
-            setJobWindowOpen={setJobWindowOpen}
-            setAddFormShow={setAddFormShow}
-            setSection={setSection}
-          />
-          <JobSection
-            title="Interviewing"
-            icon={<FavoriteIcon />}
-            jobs={interviewingJobs}
-            setSelectedJob={setSelectedJob}
-            setJobWindowOpen={setJobWindowOpen}
-            setAddFormShow={setAddFormShow}
-            setSection={setSection}
-          />
-          <JobSection
-            title="Offers"
-            icon={<FavoriteIcon />}
-            jobs={offerJobs}
-            setSelectedJob={setSelectedJob}
-            setJobWindowOpen={setJobWindowOpen}
-            setAddFormShow={setAddFormShow}
-            setSection={setSection}
-          />
-          <JobSection
-            title="Rejected"
-            icon={<FavoriteIcon />}
-            jobs={rejectedJobs}
-            setSelectedJob={setSelectedJob}
-            setJobWindowOpen={setJobWindowOpen}
-            setAddFormShow={setAddFormShow}
-            setSection={setSection}
-          />
-          <JobSection
-            title="Archived"
-            icon={<FavoriteIcon />}
-            jobs={archivedJobs}
-            setSelectedJob={setSelectedJob}
-            setJobWindowOpen={setJobWindowOpen}
-            setAddFormShow={setAddFormShow}
-            setSection={setSection}
-          />
-        </Box>
+          <Navbar />
 
-        {/* <Drawer
+          <JobForm
+            open={addformShow}
+            addJob={addJob}
+            jobSection={section}
+            close={() => setAddFormShow(false)}
+          />
+
+          <JobWindow
+            open={jobWindowOpen}
+            onClose={() => setJobWindowOpen(false)}
+            job={selectedJob}
+          />
+
+          <Box
+            className="hide-scrollbar"
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              height: "calc(100vh - 120px)",
+              width: "100%",
+              overflowX: "auto",
+              overflowY: "hidden",
+              px: "20px",
+              gap: "16px",
+            }}
+          >
+            <JobSection
+              title="Wish List"
+              icon={<FavoriteIcon />}
+              jobs={wishlistJobs}
+              setSelectedJob={setSelectedJob}
+              setJobWindowOpen={setJobWindowOpen}
+              setAddFormShow={setAddFormShow}
+              setSection={setSection}
+            />
+            <JobSection
+              title="Applied"
+              icon={<FavoriteIcon />}
+              jobs={appliedJobs}
+              setSelectedJob={setSelectedJob}
+              setJobWindowOpen={setJobWindowOpen}
+              setAddFormShow={setAddFormShow}
+              setSection={setSection}
+            />
+            <JobSection
+              title="Interviewing"
+              icon={<FavoriteIcon />}
+              jobs={interviewingJobs}
+              setSelectedJob={setSelectedJob}
+              setJobWindowOpen={setJobWindowOpen}
+              setAddFormShow={setAddFormShow}
+              setSection={setSection}
+            />
+            <JobSection
+              title="Offers"
+              icon={<FavoriteIcon />}
+              jobs={offerJobs}
+              setSelectedJob={setSelectedJob}
+              setJobWindowOpen={setJobWindowOpen}
+              setAddFormShow={setAddFormShow}
+              setSection={setSection}
+            />
+            <JobSection
+              title="Rejected"
+              icon={<FavoriteIcon />}
+              jobs={rejectedJobs}
+              setSelectedJob={setSelectedJob}
+              setJobWindowOpen={setJobWindowOpen}
+              setAddFormShow={setAddFormShow}
+              setSection={setSection}
+            />
+            <JobSection
+              title="Archived"
+              icon={<FavoriteIcon />}
+              jobs={archivedJobs}
+              setSelectedJob={setSelectedJob}
+              setJobWindowOpen={setJobWindowOpen}
+              setAddFormShow={setAddFormShow}
+              setSection={setSection}
+            />
+          </Box>
+
+          {/* <Drawer
           variant="permanent"
           PaperProps={{
             sx: {
@@ -184,8 +198,9 @@ function App() {
         >
           hello
         </Drawer> */}
-      </Box>
-    </Container>
+        </Box>
+      </Container>
+    </DragDropProvider>
   );
 }
 
