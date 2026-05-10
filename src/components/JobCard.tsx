@@ -7,15 +7,18 @@ export default function JobCard({
   job,
   setSelectedJob,
   setJobWindowOpen,
+  currentSection,
 }: {
   job: Job;
   setSelectedJob: (job: Job) => void;
   setJobWindowOpen: (open: boolean) => void;
+  currentSection: string;
 }) {
   const { ref } = useDraggable({
     id: job.id,
     data: {
       job,
+      currentSection: currentSection,
     },
   });
 

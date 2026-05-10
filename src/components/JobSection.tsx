@@ -1,6 +1,9 @@
 import { Card, Box, Typography, Button } from "@mui/material";
+import { useDroppable } from "@dnd-kit/react";
+
 import JobCard from "./JobCard";
 import type { Job } from "../types/Job";
+import { use } from "react";
 
 export default function JobSection({
   title,
@@ -19,8 +22,13 @@ export default function JobSection({
   setAddFormShow: (open: boolean) => void;
   setSection: (section: string) => void;
 }) {
+  const { ref } = useDroppable({
+    id: title,
+  });
+
   return (
     <Card
+      ref={ref}
       sx={{
         height: "calc(100% - 70px)",
         width: "300px",
@@ -97,6 +105,7 @@ export default function JobSection({
             job={job}
             setSelectedJob={setSelectedJob}
             setJobWindowOpen={setJobWindowOpen}
+            currentSection={title}
           />
         ))}
       </Box>

@@ -28,12 +28,14 @@ import JobCard from "./components/JobCard";
 function App() {
   const [addformShow, setAddFormShow] = useState(false);
 
-  const [wishlistJobs, setwishlistJobs] = useState<Job[]>(wishlist);
-  const [appliedJobs, setappliedJobs] = useState<Job[]>(applied);
-  const [interviewingJobs, setinterviewingJobs] = useState<Job[]>(interviewing);
-  const [offerJobs, setofferJobs] = useState<Job[]>(offer);
-  const [rejectedJobs, setrejectedJobs] = useState<Job[]>(rejected);
-  const [archivedJobs, setarchivedJobs] = useState<Job[]>(archived);
+  const [sections, setSections] = useState({
+    "Wish List": wishlist,
+    Applied: applied,
+    Interviewing: interviewing,
+    Offers: offer,
+    Rejected: rejected,
+    Archived: archived,
+  });
 
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [jobWindowOpen, setJobWindowOpen] = useState(false);
@@ -43,43 +45,90 @@ function App() {
 
   const [isDropped, setIsDropped] = useState(false);
 
-  useEffect(() => {
-    fetch_applications().then((data: Application[]) => {
-      console.log(data);
-    });
-  });
+  // useEffect(() => {
+  //   fetch_applications().then((data: Application[]) => {
+  //     console.log(data);
+  //   });
+  // });
 
   function addJob(job: Job, section: string) {
     switch (section) {
       case "Wish List":
         console.log("wish list job added");
-        setwishlistJobs([...wishlistJobs, job]);
+        setSections((prev) => ({
+          ...prev,
+          "Wish List": [...prev["Wish List"], job],
+        }));
         break;
       case "Applied":
-        setappliedJobs([...appliedJobs, job]);
+        setSections((prev) => ({
+          ...prev,
+          Applied: [...prev.Applied, job],
+        }));
         break;
       case "Interviewing":
-        setinterviewingJobs([...interviewingJobs, job]);
+        setSections((prev) => ({
+          ...prev,
+          Interviewing: [...prev.Interviewing, job],
+        }));
         break;
       case "Offers":
-        setofferJobs([...offerJobs, job]);
+        setSections((prev) => ({
+          ...prev,
+          Offers: [...prev.Offers, job],
+        }));
         break;
       case "Rejected":
-        setrejectedJobs([...rejectedJobs, job]);
+        setSections((prev) => ({
+          ...prev,
+          Rejected: [...prev.Rejected, job],
+        }));
         break;
       case "Archived":
-        setarchivedJobs([...archivedJobs, job]);
+        setSections((prev) => ({
+          ...prev,
+          Archived: [...prev.Archived, job],
+        }));
         break;
     }
   }
+  type SectionName =
+    | "Wish List"
+    | "Applied"
+    | "Interviewing"
+    | "Offers"
+    | "Rejected"
+    | "Archived";
 
   return (
     <DragDropProvider
       onDragEnd={(event) => {
         if (event.canceled) return;
 
-        const { target } = event.operation;
-        setIsDropped(target?.id === "droppable");
+        const sourceSection = event.operation.source?.data
+          ?.currentSection as SectionName;
+
+        const targetSection = event.operation.target?.id as SectionName;
+
+        const draggedJob = event.operation.source?.data?.job as Job;
+        if (!sourceSection || !targetSection || !draggedJob) return;
+
+        if (sourceSection === targetSection) return;
+
+        setSections((prev) => ({
+          ...prev,
+          [sourceSection]: prev[sourceSection].filter(
+            (job) => job.id !== draggedJob.id,
+          ),
+          [targetSection]: [...prev[targetSection], draggedJob],
+        }));
+        console.log({
+          source: event.operation.source,
+          target: event.operation.target,
+          sourceSection,
+          targetSection,
+          draggedJob,
+        });
       }}
     >
       {" "}
@@ -133,7 +182,7 @@ function App() {
             <JobSection
               title="Wish List"
               icon={<FavoriteIcon />}
-              jobs={wishlistJobs}
+              jobs={sections["Wish List"]}
               setSelectedJob={setSelectedJob}
               setJobWindowOpen={setJobWindowOpen}
               setAddFormShow={setAddFormShow}
@@ -142,7 +191,7 @@ function App() {
             <JobSection
               title="Applied"
               icon={<FavoriteIcon />}
-              jobs={appliedJobs}
+              jobs={sections.Applied}
               setSelectedJob={setSelectedJob}
               setJobWindowOpen={setJobWindowOpen}
               setAddFormShow={setAddFormShow}
@@ -151,7 +200,7 @@ function App() {
             <JobSection
               title="Interviewing"
               icon={<FavoriteIcon />}
-              jobs={interviewingJobs}
+              jobs={sections.Interviewing}
               setSelectedJob={setSelectedJob}
               setJobWindowOpen={setJobWindowOpen}
               setAddFormShow={setAddFormShow}
@@ -160,7 +209,7 @@ function App() {
             <JobSection
               title="Offers"
               icon={<FavoriteIcon />}
-              jobs={offerJobs}
+              jobs={sections.Offers}
               setSelectedJob={setSelectedJob}
               setJobWindowOpen={setJobWindowOpen}
               setAddFormShow={setAddFormShow}
@@ -169,7 +218,7 @@ function App() {
             <JobSection
               title="Rejected"
               icon={<FavoriteIcon />}
-              jobs={rejectedJobs}
+              jobs={sections.Rejected}
               setSelectedJob={setSelectedJob}
               setJobWindowOpen={setJobWindowOpen}
               setAddFormShow={setAddFormShow}
@@ -178,7 +227,7 @@ function App() {
             <JobSection
               title="Archived"
               icon={<FavoriteIcon />}
-              jobs={archivedJobs}
+              jobs={sections.Archived}
               setSelectedJob={setSelectedJob}
               setJobWindowOpen={setJobWindowOpen}
               setAddFormShow={setAddFormShow}
