@@ -1,9 +1,14 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { DragDropProvider } from "@dnd-kit/react";
 import "./App.css";
 
 import FavoriteIcon from "@mui/icons-material/Favorite";
-import { CssBaseline } from "@mui/material";
+import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
+import ForumIcon from "@mui/icons-material/Forum";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import CancelIcon from "@mui/icons-material/Cancel";
+import ArchiveIcon from "@mui/icons-material/Archive";
+import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 
@@ -12,8 +17,6 @@ import JobSection from "./components/JobSection";
 import JobWindow from "./components/JobWindow";
 import Navbar from "./components/Navbar";
 
-import { fetch_applications } from "./services/application_service";
-import type { Application } from "./services/application_service";
 import type { Job } from "./types/Job";
 import {
   applied,
@@ -23,7 +26,6 @@ import {
   rejected,
   wishlist,
 } from "./demoData";
-import JobCard from "./components/JobCard";
 
 function App() {
   const [addformShow, setAddFormShow] = useState(false);
@@ -41,15 +43,6 @@ function App() {
   const [jobWindowOpen, setJobWindowOpen] = useState(false);
 
   const [section, setSection] = useState<string>("wishlist");
-  const [activeJob, setActiveJob] = useState<Job | null>(null);
-
-  const [isDropped, setIsDropped] = useState(false);
-
-  // useEffect(() => {
-  //   fetch_applications().then((data: Application[]) => {
-  //     console.log(data);
-  //   });
-  // });
 
   function addJob(job: Job, section: string) {
     switch (section) {
@@ -100,7 +93,27 @@ function App() {
     | "Rejected"
     | "Archived";
 
+  const [mode, setMode] = useState<"light" | "dark">(() =>
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light",
+  );
+
+  const theme = useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode,
+        },
+      }),
+    [mode],
+  );
+
+
+
   return (
+    <ThemeProvider theme={theme}>
     <DragDropProvider
       onDragEnd={(event) => {
         if (event.canceled) return;
@@ -151,7 +164,7 @@ function App() {
             },
           }}
         >
-          <Navbar />
+          <Navbar mode={mode} setMode={setMode} />
 
           <JobForm
             open={addformShow}
@@ -190,7 +203,7 @@ function App() {
             />
             <JobSection
               title="Applied"
-              icon={<FavoriteIcon />}
+              icon={<AssignmentTurnedInIcon />}
               jobs={sections.Applied}
               setSelectedJob={setSelectedJob}
               setJobWindowOpen={setJobWindowOpen}
@@ -199,7 +212,7 @@ function App() {
             />
             <JobSection
               title="Interviewing"
-              icon={<FavoriteIcon />}
+              icon={<ForumIcon />}
               jobs={sections.Interviewing}
               setSelectedJob={setSelectedJob}
               setJobWindowOpen={setJobWindowOpen}
@@ -208,7 +221,7 @@ function App() {
             />
             <JobSection
               title="Offers"
-              icon={<FavoriteIcon />}
+              icon={<LocalOfferIcon />}
               jobs={sections.Offers}
               setSelectedJob={setSelectedJob}
               setJobWindowOpen={setJobWindowOpen}
@@ -217,7 +230,7 @@ function App() {
             />
             <JobSection
               title="Rejected"
-              icon={<FavoriteIcon />}
+              icon={<CancelIcon />}
               jobs={sections.Rejected}
               setSelectedJob={setSelectedJob}
               setJobWindowOpen={setJobWindowOpen}
@@ -226,7 +239,7 @@ function App() {
             />
             <JobSection
               title="Archived"
-              icon={<FavoriteIcon />}
+              icon={<ArchiveIcon />}
               jobs={sections.Archived}
               setSelectedJob={setSelectedJob}
               setJobWindowOpen={setJobWindowOpen}
@@ -250,6 +263,7 @@ function App() {
         </Box>
       </Container>
     </DragDropProvider>
+    </ThemeProvider>
   );
 }
 

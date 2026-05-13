@@ -1,73 +1,110 @@
-# React + TypeScript + Vite
+# Job Application Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A Kanban-style full-stack job search tracker built to manage real job applications from wishlist to archive.
 
-Currently, two official plugins are available:
+This project is designed as a portfolio-grade app to demonstrate practical React + TypeScript + UI architecture skills for full-stack roles.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Why I built this
 
-## React Compiler
+Applying for jobs across multiple platforms gets messy fast. I wanted a focused tool where I can:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Track each role by stage (`Wish List`, `Applied`, `Interviewing`, `Offers`, `Rejected`, `Archived`)
+- Move applications quickly with drag and drop
+- Keep role-specific notes in one place
+- Maintain visibility of my job pipeline and next actions
 
-## Expanding the ESLint configuration
+## Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Multi-column job board by application stage
+- Drag-and-drop stage transitions
+- Add new job entries with form modal
+- Job details side panel/window
+- Light/Dark mode toggle
+- Responsive horizontal board layout with hidden scrollbars
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Tech Stack
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Frontend
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- React 19
+- TypeScript
+- Vite
+- Material UI (MUI)
+- dnd-kit (`@dnd-kit/react`)
+
+### Tooling
+
+- ESLint
+- TypeScript build (`tsc -b`)
+
+## Project Structure
+
+```text
+src/
+  components/
+    Navbar.tsx
+    JobSection.tsx
+    JobCard.tsx
+    JobForm.tsx
+    JobWindow.tsx
+  services/
+    application_service.ts
+  types/
+    Job.ts
+  demoData.ts
+  App.tsx
+  main.tsx
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Getting Started
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 1) Clone
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+git clone <your-repo-url>
+cd "job-application"
 ```
+
+### 2) Install dependencies
+
+```bash
+npm install
+```
+
+### 3) Run locally
+
+```bash
+npm run dev
+```
+
+Open the local URL shown in your terminal (usually `http://localhost:5173`).
+
+## Scripts
+
+- `npm run dev` - Start local dev server
+- `npm run build` - Type-check and build for production
+- `npm run preview` - Preview production build locally
+- `npm run lint` - Run ESLint
+
+## Demo
+
+Add these after deployment:
+
+- Live app: `<paste-live-url>`
+- Demo video (60-90 seconds): `<paste-video-url>`
+
+## What I would improve next
+
+- Persist data with a backend API + database
+- Add authentication
+- Add filtering/search and analytics (conversion by stage)
+- Add test coverage (component + integration)
+- Add CI pipeline for lint/build/test checks
+
+## Portfolio/CV blurb
+
+Built a job application tracker using React, TypeScript, MUI, and dnd-kit to manage end-to-end job pipelines across six stages. Implemented drag-and-drop workflows, reusable typed components, and dark-mode theming with clean state management and production build tooling.
+
+## License
+
+MIT (or your preferred license)

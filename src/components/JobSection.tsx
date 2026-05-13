@@ -3,7 +3,6 @@ import { useDroppable } from "@dnd-kit/react";
 
 import JobCard from "./JobCard";
 import type { Job } from "../types/Job";
-import { use } from "react";
 
 export default function JobSection({
   title,
@@ -29,14 +28,14 @@ export default function JobSection({
   return (
     <Card
       ref={ref}
-      sx={{
+      sx={(theme)=>{return { 
+        backgroundColor: theme.palette.mode === "dark" ? theme.palette.grey[800] : theme.palette.grey[200],
         height: "calc(100% - 70px)",
         width: "300px",
 
         margin: "70px 0px 0px 0px",
 
         backdropFilter: "blur(10px)",
-        backgroundColor: "rgb(226, 226, 226)",
         borderRadius: "20px",
 
         display: "flex",
@@ -44,7 +43,7 @@ export default function JobSection({
         alignItems: "center",
         minWidth: "300px",
         flexShrink: 0,
-      }}
+      }}}
     >
       <Box
         width={"100%"}
