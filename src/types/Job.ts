@@ -1,10 +1,27 @@
+export type ApplicationStatus =
+  | "wishlist"
+  | "applied"
+  | "interviewing"
+  | "offers"
+  | "rejected"
+  | "archived";
+
 export type Job = {
-  id: number;
+  id: number ;
   title: string;
   company: string;
   location: string;
-  salary: string;
-  description: string;
-  category: "IT" | "Cybersecurity" | "Other"; //more categoeries can be added as needed.
-  logo: string | null; //perhaps I will have a directory of images user can upload to with the company logo.
+  salary: number | null;
+  description: string | null;
+  category: string | null;
+  logo: string | null;
+  status: ApplicationStatus;
+};
+
+export type JobCreate = Omit<Job, "id">;
+
+export type JobUpdate = Partial<Job>;
+
+export type Category = {
+  id: string;
 };

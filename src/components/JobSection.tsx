@@ -3,6 +3,7 @@ import { useDroppable } from "@dnd-kit/react";
 
 import JobCard from "./JobCard";
 import type { Job } from "../types/Job";
+import type { SectionName } from "../utils/jobStatus";
 
 export default function JobSection({
   title,
@@ -13,13 +14,13 @@ export default function JobSection({
   setAddFormShow,
   setSection,
 }: {
-  title: string;
+  title: SectionName;
   icon: React.ReactNode;
   jobs: Job[];
   setSelectedJob: (job: Job) => void;
   setJobWindowOpen: (open: boolean) => void;
   setAddFormShow: (open: boolean) => void;
-  setSection: (section: string) => void;
+  setSection: (section: SectionName) => void;
 }) {
   const { ref } = useDroppable({
     id: title,
@@ -100,7 +101,7 @@ export default function JobSection({
       >
         {jobs.map((job) => (
           <JobCard
-            key={job.id}
+            key={job.id ?? `${job.title}-${job.company}`}
             job={job}
             setSelectedJob={setSelectedJob}
             setJobWindowOpen={setJobWindowOpen}

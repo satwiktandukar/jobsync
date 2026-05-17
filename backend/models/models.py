@@ -6,7 +6,9 @@ class ApplicationStatus(str, Enum):
     wishlist = "wishlist"
     applied = "applied"
     interviewing = "interviewing"
+    offers = "offers"
     rejected = "rejected"
+    archived = "archived"
 
 
 class JobApplication(SQLModel, table=True):

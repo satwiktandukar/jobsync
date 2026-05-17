@@ -15,7 +15,7 @@ export default function JobCard({
   currentSection: string;
 }) {
   const { ref } = useDraggable({
-    id: job.id,
+    id: job.id ?? `temp-${job.title}-${job.company}`,
     data: {
       job,
       currentSection: currentSection,
