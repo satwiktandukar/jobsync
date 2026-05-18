@@ -7,7 +7,7 @@ export type ApplicationStatus =
   | "archived";
 
 export type Job = {
-  id: number ;
+  id: number;
   title: string;
   company: string;
   location: string;

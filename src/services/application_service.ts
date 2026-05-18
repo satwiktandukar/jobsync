@@ -75,16 +75,6 @@ export async function get_applications(
   return request<Job[]>(`/applications${query ? `?${query}` : ""}`);
 }
 
-/** @deprecated Prefer `get_applications({ status })` for optional filters. */
-export async function get_all_applications(
-  status: ApplicationStatus | null,
-  category?: string,
-): Promise<Job[]> {
-  return get_applications({
-    ...(status ? { status } : {}),
-    ...(category ? { category } : {}),
-  });
-}
 
 export async function get_application(id: number): Promise<Job> {
   return request<Job>(`/applications/${id}`);

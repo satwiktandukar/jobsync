@@ -19,7 +19,12 @@ import Navbar from "./components/Navbar";
 
 import type { Job, JobUpdate } from "./types/Job";
 import { demoJobs } from "./demoData";
-import { get_applications, update_application } from "./services/application_service";
+import {
+  create_category,
+  get_applications,
+  get_categories,
+  update_application,
+} from "./services/application_service";
 import {
   SECTIONS,
   sectionToStatus,
@@ -28,7 +33,7 @@ import {
 } from "./utils/jobStatus";
 
 function App() {
-  const empty_job: Job = {  
+  const empty_job: Job = {
     id: 99999,
     title: "",
     company: "",
@@ -38,41 +43,80 @@ function App() {
     category: "",
     logo: "",
     status: "wishlist",
-  }
+  };
 
   const [addformShow, setAddFormShow] = useState(false);
   const [jobs, setJobs] = useState<Job[]>(demoJobs);
-  const [selectedJob, setSelectedJob] = useState<Job >(empty_job);
+
+  const [selectedJob, setSelectedJob] = useState<Job>(empty_job);
   const [jobWindowOpen, setJobWindowOpen] = useState(false);
   const [section, setSection] = useState<SectionName>("Wish List");
 
-  useEffect( () =>{ async function fetch_data() {
-    const data =await get_applications();
-    setJobs(data);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
-  }
-  fetch_data();
-},[])
+  useEffect(() => {
+    async function fetch_data() {
+      const applications = await get_applications();
+      const categories = await get_categories();
+
+      setJobs(applications);
+      setCategories(categories.map((category) => category.id));
+    }
+
+    fetch_data();
+  }, []);
+
+  const filteredJobs = useMemo(() => {
+    if (selectedCategory === "All") {
+      return jobs;
+    }
+
+    return jobs.filter(
+      (job) => job.category?.toLowerCase() === selectedCategory.toLowerCase(),
+    );
+  }, [jobs, selectedCategory]);
 
   const sections = useMemo(
     () =>
       Object.fromEntries(
         SECTIONS.map((name) => [
           name,
-          jobs.filter((job) => statusToSection[job.status] === name),
+          filteredJobs.filter((job) => statusToSection[job.status] === name),
         ]),
       ) as Record<SectionName, Job[]>,
-    [jobs],
+    [filteredJobs],
   );
+  async function handleAddCategory() {
+    const category = prompt("Enter category name:");
 
+    if (!category) return;
+
+    const cleanedCategory = category.trim();
+
+    if (!cleanedCategory) return;
+
+    const alreadyExists = categories.some(
+      (existing) => existing.toLowerCase() === cleanedCategory.toLowerCase(),
+    );
+
+    if (alreadyExists) return;
+
+    try {
+      const createdCategory = await create_category(cleanedCategory);
+
+      setCategories((prev) => [...prev, createdCategory.id]);
+      setSelectedCategory(createdCategory.id);
+    } catch (error) {
+      console.error(error);
+    }
+  }
   function addJob(job: Job) {
     setJobs((prev) => [...prev, job]);
   }
 
   function updateJob(updated: Job) {
-    setJobs((prev) =>
-      prev.map((j) => (j.id === updated.id ? updated : j)),
-    );
+    setJobs((prev) => prev.map((j) => (j.id === updated.id ? updated : j)));
     setSelectedJob(updated);
   }
 
@@ -92,7 +136,6 @@ function App() {
       }),
     [mode],
   );
-
 
   return (
     <ThemeProvider theme={theme}>
@@ -117,7 +160,7 @@ function App() {
               job.id === draggedJob.id ? { ...job, status: newStatus } : job,
             ),
           );
-          const update_data: JobUpdate = {status: newStatus}
+          const update_data: JobUpdate = { status: newStatus };
           update_application(draggedJob.id, update_data);
         }}
       >
@@ -140,8 +183,14 @@ function App() {
               },
             }}
           >
-            <Navbar mode={mode} setMode={setMode} />
-
+            <Navbar
+              mode={mode}
+              setMode={setMode}
+              categories={categories}
+              selectedCategory={selectedCategory}
+              setSelectedCategory={setSelectedCategory}
+              onAddCategory={handleAddCategory}
+            />
             <JobForm
               open={addformShow}
               addJob={addJob}
