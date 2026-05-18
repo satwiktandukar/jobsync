@@ -56,13 +56,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-// --- Health ---
-
 export async function health_check(): Promise<{ message: string }> {
   return request<{ message: string }>("/");
 }
-
-// --- Applications ---
 
 export async function get_applications(
   params?: GetApplicationsParams,
@@ -74,7 +70,6 @@ export async function get_applications(
   const query = searchParams.toString();
   return request<Job[]>(`/applications${query ? `?${query}` : ""}`);
 }
-
 
 export async function get_application(id: number): Promise<Job> {
   return request<Job>(`/applications/${id}`);
@@ -113,5 +108,11 @@ export async function create_category(id: string): Promise<Category> {
   return request<Category>("/category", {
     method: "POST",
     body: JSON.stringify({ id }),
+  });
+}
+
+export async function delete_category(id: string): Promise<Category> {
+  return request<Category>(`/category/${id}`, {
+    method: "DELETE",
   });
 }

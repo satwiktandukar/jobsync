@@ -175,3 +175,15 @@ async def create_category(
         )
 
     return category
+
+
+@app.delete("/category/{id}", response_model=CategorySchema)
+async def delete_category(id: str, session: sql_engine.SessionDep):
+    category = session.get(Category, id)
+    if (not category): 
+        raise HTTPException(status_code=404, detail="Category not found")
+    
+    session.delete(category)
+    session.commit()
+
+    return category

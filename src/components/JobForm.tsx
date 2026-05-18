@@ -18,6 +18,7 @@ type JobFormProps = {
   addJob: (job: Job) => void;
   close: () => void;
   jobSection: SectionName;
+  category: string;
 };
 
 const emptyForm = {
@@ -41,6 +42,7 @@ export default function JobForm({
   addJob,
   close,
   jobSection,
+  category,
 }: JobFormProps) {
   const [data, setData] = useState(emptyForm);
 
@@ -81,7 +83,7 @@ export default function JobForm({
       location: data.location,
       salary: Number.isNaN(salary) ? null : salary,
       description: data.description.trim() || null,
-      category: data.category.trim() || null,
+      category: category,
       logo: data.logo.trim() || null,
       status: sectionToStatus[jobSection],
     };
@@ -188,14 +190,14 @@ export default function JobForm({
               rows={4}
             />
 
-            <TextField
+            {/* <TextField
               name="category"
               label="Category"
               value={data.category}
               onChange={handleChange}
               sx={fieldSx}
               fullWidth
-            />
+            /> */}
 
             <TextField
               name="logo"

@@ -8,6 +8,7 @@ import ForumIcon from "@mui/icons-material/Forum";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import CancelIcon from "@mui/icons-material/Cancel";
 import ArchiveIcon from "@mui/icons-material/Archive";
+
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
@@ -21,6 +22,7 @@ import type { Job, JobUpdate } from "./types/Job";
 import { demoJobs } from "./demoData";
 import {
   create_category,
+  delete_category,
   get_applications,
   get_categories,
   update_application,
@@ -55,6 +57,13 @@ function App() {
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
 
+  const [mode, setMode] = useState<"light" | "dark">(() =>
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light",
+  );
+
   useEffect(() => {
     async function fetch_data() {
       const applications = await get_applications();
@@ -87,6 +96,7 @@ function App() {
       ) as Record<SectionName, Job[]>,
     [filteredJobs],
   );
+
   async function handleAddCategory() {
     const category = prompt("Enter category name:");
 
@@ -111,6 +121,27 @@ function App() {
       console.error(error);
     }
   }
+
+  async function handleDeleteCategory(category: string) {
+    setCategories((prev) => prev.filter((c) => c !== category));
+
+    if (selectedCategory === category) {
+      setSelectedCategory("All");
+    }
+
+    try {
+      await delete_category(category);
+    } catch (error) {
+      console.error(error);
+      setSelectedCategory("All");
+      alert("Failed to delete category.");
+    }
+  }
+
+  function handleReorderCategories(nextCategories: string[]) {
+    setCategories(nextCategories);
+  }
+
   function addJob(job: Job) {
     setJobs((prev) => [...prev, job]);
   }
@@ -120,18 +151,59 @@ function App() {
     setSelectedJob(updated);
   }
 
-  const [mode, setMode] = useState<"light" | "dark">(() =>
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light",
-  );
-
   const theme = useMemo(
     () =>
       createTheme({
         palette: {
           mode,
+
+          background: {
+            default: mode === "dark" ? "#0f1115" : "#f4f7fb",
+            paper: mode === "dark" ? "#1a1d24" : "#ffffff",
+          },
+
+          primary: {
+            main: "#7c5cff",
+          },
+
+          success: {
+            main: "#5ac85a",
+          },
+        },
+
+        shape: {
+          borderRadius: 18,
+        },
+
+        typography: {
+          fontFamily: '"Inter", "SF Pro Display", "Roboto", sans-serif',
+
+          h6: {
+            fontWeight: 700,
+          },
+
+          button: {
+            textTransform: "none",
+            fontWeight: 600,
+          },
+        },
+
+        components: {
+          MuiButton: {
+            styleOverrides: {
+              root: {
+                transition: "all 0.2s ease",
+              },
+            },
+          },
+
+          MuiPaper: {
+            styleOverrides: {
+              root: {
+                transition: "all 0.2s ease",
+              },
+            },
+          },
         },
       }),
     [mode],
@@ -139,6 +211,8 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
+      <CssBaseline />
+
       <DragDropProvider
         onDragEnd={(event) => {
           if (event.canceled) return;
@@ -149,6 +223,7 @@ function App() {
           const targetSection = event.operation.target?.id as SectionName;
 
           const draggedJob = event.operation.source?.data?.job as Job;
+
           if (!sourceSection || !targetSection || !draggedJob) return;
 
           if (sourceSection === targetSection) return;
@@ -160,24 +235,21 @@ function App() {
               job.id === draggedJob.id ? { ...job, status: newStatus } : job,
             ),
           );
+
           const update_data: JobUpdate = { status: newStatus };
           update_application(draggedJob.id, update_data);
         }}
       >
-        <Container
-          maxWidth={false}
-          disableGutters
-          sx={{
-            overflow: "visible",
-          }}
-        >
-          <CssBaseline />
-
+        <Container maxWidth={false} disableGutters sx={{ overflow: "visible" }}>
           <Box
             className="App"
             sx={{
+              minHeight: "100vh",
+
               overflow: "visible",
+
               scrollbarWidth: "none",
+
               "&::-webkit-scrollbar": {
                 display: "none",
               },
@@ -190,12 +262,16 @@ function App() {
               selectedCategory={selectedCategory}
               setSelectedCategory={setSelectedCategory}
               onAddCategory={handleAddCategory}
+              onDeleteCategory={handleDeleteCategory}
+              onReorderCategories={handleReorderCategories}
             />
+
             <JobForm
               open={addformShow}
               addJob={addJob}
               jobSection={section}
               close={() => setAddFormShow(false)}
+              category={selectedCategory}
             />
 
             <JobWindow
@@ -210,12 +286,25 @@ function App() {
               sx={{
                 display: "flex",
                 flexDirection: "row",
-                height: "calc(100vh - 120px)",
+
+                height: "calc(100vh - 88px)",
                 width: "100%",
+
                 overflowX: "auto",
                 overflowY: "hidden",
-                px: "20px",
-                gap: "16px",
+
+                px: 3,
+                py: 2.5,
+
+                gap: 2.5,
+
+                alignItems: "flex-start",
+
+                scrollbarWidth: "none",
+
+                "&::-webkit-scrollbar": {
+                  display: "none",
+                },
               }}
             >
               <JobSection
@@ -227,6 +316,7 @@ function App() {
                 setAddFormShow={setAddFormShow}
                 setSection={setSection}
               />
+
               <JobSection
                 title="Applied"
                 icon={<AssignmentTurnedInIcon />}
@@ -236,6 +326,7 @@ function App() {
                 setAddFormShow={setAddFormShow}
                 setSection={setSection}
               />
+
               <JobSection
                 title="Interviewing"
                 icon={<ForumIcon />}
@@ -245,6 +336,7 @@ function App() {
                 setAddFormShow={setAddFormShow}
                 setSection={setSection}
               />
+
               <JobSection
                 title="Offers"
                 icon={<LocalOfferIcon />}
@@ -254,6 +346,7 @@ function App() {
                 setAddFormShow={setAddFormShow}
                 setSection={setSection}
               />
+
               <JobSection
                 title="Rejected"
                 icon={<CancelIcon />}
@@ -263,6 +356,7 @@ function App() {
                 setAddFormShow={setAddFormShow}
                 setSection={setSection}
               />
+
               <JobSection
                 title="Archived"
                 icon={<ArchiveIcon />}

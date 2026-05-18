@@ -29,22 +29,45 @@ export default function JobSection({
   return (
     <Card
       ref={ref}
-      sx={(theme)=>{return { 
-        backgroundColor: theme.palette.mode === "dark" ? theme.palette.grey[800] : theme.palette.grey[200],
-        height: "calc(100% - 70px)",
-        width: "300px",
+      sx={(theme) => {
+        return {
+          backgroundColor:
+            theme.palette.mode === "dark"
+              ? theme.palette.grey[800]
+              : theme.palette.grey[200],
+          height: "calc(100% - 70px)",
+          width: "300px",
 
-        margin: "70px 0px 0px 0px",
+          margin: "70px 0px 0px 0px",
 
-        backdropFilter: "blur(10px)",
-        borderRadius: "20px",
+          borderRadius: "20px",
 
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        minWidth: "300px",
-        flexShrink: 0,
-      }}}
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          minWidth: "300px",
+          flexShrink: 0,
+          background:
+            theme.palette.mode === "dark"
+              ? "rgba(255,255,255,0.06)"
+              : "rgba(255,255,255,0.72)",
+
+          backdropFilter: "blur(18px)",
+          WebkitBackdropFilter: "blur(18px)",
+
+          border:
+            theme.palette.mode === "dark"
+              ? "1px solid rgba(255,255,255,0.08)"
+              : "1px solid rgba(255,255,255,0.7)",
+
+          boxShadow:
+            theme.palette.mode === "dark"
+              ? "0 18px 40px rgba(0,0,0,0.28)"
+              : "0 18px 40px rgba(30,40,60,0.10)",
+
+          transition: "all 0.22s ease",
+        };
+      }}
     >
       <Box
         width={"100%"}
