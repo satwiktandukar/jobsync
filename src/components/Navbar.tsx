@@ -19,17 +19,19 @@ import {
   useDroppable,
 } from "@dnd-kit/react";
 
+import type { Category } from "../types/Job";
+
 const DELETE_CATEGORY_ID = "delete-category";
 
 type NavbarProps = {
   mode: "light" | "dark";
   setMode: (mode: "light" | "dark") => void;
-  categories: string[];
-  selectedCategory: string;
-  setSelectedCategory: (category: string) => void;
+  categories: Category[];
+  selectedCategory: number | "All";
+  setSelectedCategory: (category: number | "All") => void;
   onAddCategory: () => void;
-  onReorderCategories: (categories: string[]) => void;
-  onDeleteCategory: (category: string) => void;
+  onReorderCategories: (categories: Category[]) => void;
+  onDeleteCategory: (category: Category) => void;
 };
 
 function moveItem<T>(items: T[], fromIndex: number, toIndex: number): T[] {
@@ -44,25 +46,25 @@ function CategoryButton({
   selectedCategory,
   setSelectedCategory,
 }: {
-  category: string;
-  selectedCategory: string;
-  setSelectedCategory: (category: string) => void;
+  category: Category;
+  selectedCategory: number | "All";
+  setSelectedCategory: (category: number | "All") => void;
 }) {
   const { ref: draggableRef } = useDraggable({
-    id: `category-${category}`,
+    id: `category-${category.id}`,
     data: {
       category,
     },
   });
 
   const { ref: droppableRef } = useDroppable({
-    id: `category-${category}`,
+    id: `category-${category.id}`,
     data: {
       category,
     },
   });
 
-  const selected = selectedCategory === category;
+  const selected = selectedCategory === category.id;
 
   return (
     <Button
@@ -72,7 +74,7 @@ function CategoryButton({
       }}
       color="inherit"
       variant={selected ? "contained" : "text"}
-      onClick={() => setSelectedCategory(category)}
+      onClick={() => setSelectedCategory(category.id)}
       sx={{
         minWidth: "180px",
         maxWidth: "220px",
@@ -88,7 +90,7 @@ function CategoryButton({
         backdropFilter: "blur(12px)",
       }}
     >
-      {category}
+      {category.title}
     </Button>
   );
 }
@@ -134,11 +136,11 @@ export default function Navbar({
   onReorderCategories,
   onDeleteCategory,
 }: NavbarProps) {
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<Category | null>(null);
 
   function handleDragStart(event: any) {
     const category = event.operation.source?.data?.category as
-      | string
+      | Category
       | undefined;
 
     if (!category) return;
@@ -153,7 +155,7 @@ export default function Navbar({
     }
 
     const sourceCategory = event.operation.source?.data?.category as
-      | string
+      | Category
       | undefined;
 
     const targetId = event.operation.target?.id as string | undefined;
@@ -164,7 +166,7 @@ export default function Navbar({
 
     if (targetId === DELETE_CATEGORY_ID) {
       const shouldDelete = window.confirm(
-        `Delete category "${sourceCategory}"?`,
+        `Delete category "${sourceCategory.title}"?`,
       );
 
       if (shouldDelete) {
@@ -176,12 +178,12 @@ export default function Navbar({
 
     if (!targetId.startsWith("category-")) return;
 
-    const targetCategory = targetId.replace("category-", "");
+    const targetCategoryId = Number(targetId.replace("category-", ""));
 
-    if (sourceCategory === targetCategory) return;
+    if (sourceCategory.id === targetCategoryId) return;
 
-    const oldIndex = categories.indexOf(sourceCategory);
-    const newIndex = categories.indexOf(targetCategory);
+    const oldIndex = categories.findIndex((c) => c.id === sourceCategory.id);
+    const newIndex = categories.findIndex((c) => c.id === targetCategoryId);
 
     if (oldIndex === -1 || newIndex === -1) return;
 
@@ -273,7 +275,7 @@ export default function Navbar({
             >
               {categories.map((category) => (
                 <CategoryButton
-                  key={category}
+                  key={category.id}
                   category={category}
                   selectedCategory={selectedCategory}
                   setSelectedCategory={setSelectedCategory}
@@ -302,7 +304,7 @@ export default function Navbar({
                     pointerEvents: "none",
                   }}
                 >
-                  {activeCategory}
+                  {activeCategory.title}
                 </Button>
               ) : null}
             </DragOverlay>

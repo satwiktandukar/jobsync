@@ -12,7 +12,7 @@ import {
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
 import { useState } from "react";
-import type { Job, JobCreate } from "../types/Job";
+import type { Job, JobCreate, Category } from "../types/Job";
 import { sectionToStatus, type SectionName } from "../utils/jobStatus";
 import {
   create_application,
@@ -24,7 +24,7 @@ type JobFormProps = {
   addJob: (job: Job) => void;
   close: () => void;
   jobSection: SectionName;
-  category: string;
+  category: Category | null;
 };
 
 const emptyForm = {
@@ -33,7 +33,6 @@ const emptyForm = {
   location: "",
   salary: "",
   description: "",
-  category: "",
   logo: "",
 };
 
@@ -101,7 +100,7 @@ export default function JobForm({
       location: data.location,
       salary: Number.isNaN(salary) ? null : salary,
       description: data.description.trim() || null,
-      category: category,
+      category_id: category?.id ?? null,
       logo: data.logo.trim() || null,
       status: sectionToStatus[jobSection],
     };

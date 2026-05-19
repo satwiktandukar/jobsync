@@ -26,7 +26,7 @@ function jobToForm(job: Job) {
     location: job.location,
     salary: job.salary?.toString() ?? "",
     description: job.description ?? "",
-    category: job.category ?? "",
+    category_id: job.category_id?.toString() ?? "",
     logo: job.logo ?? "",
   };
 }
@@ -91,7 +91,7 @@ export default function JobWindow({
       location: data.location,
       salary: Number.isNaN(salary) ? null : salary,
       description: data.description.trim() || null,
-      category: data.category.trim() || null,
+      category_id: data.category_id === "" ? null : Number(data.category_id),
       logo: data.logo.trim() || null,
     };
 
@@ -192,9 +192,9 @@ export default function JobWindow({
             />
 
             <TextFieldJob
-              name="category"
+              name="category_id"
               label="Category"
-              value={data.category}
+              value={data.category_id}
               handleChange={handleChange}
               isEditing={isEditing}
             />

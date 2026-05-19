@@ -18,7 +18,7 @@ import JobSection from "./components/JobSection";
 import JobWindow from "./components/JobWindow";
 import Navbar from "./components/Navbar";
 
-import type { Job, JobUpdate } from "./types/Job";
+import type { Job, JobUpdate, Category } from "./types/Job";
 import { demoJobs } from "./demoData";
 import {
   create_category,
@@ -42,7 +42,7 @@ function App() {
     location: "",
     salary: 0,
     description: "",
-    category: "",
+    category_id: null,
     logo: "",
     status: "wishlist",
   };
@@ -54,9 +54,10 @@ function App() {
   const [jobWindowOpen, setJobWindowOpen] = useState(false);
   const [section, setSection] = useState<SectionName>("Wish List");
 
-  const [categories, setCategories] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState("All");
-
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<number | "All">(
+    "All",
+  );
   const [mode, setMode] = useState<"light" | "dark">(() =>
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -70,7 +71,7 @@ function App() {
       const categories = await get_categories();
 
       setJobs(applications);
-      setCategories(categories.map((category) => category.id));
+      setCategories(categories);
     }
 
     fetch_data();
@@ -81,9 +82,7 @@ function App() {
       return jobs;
     }
 
-    return jobs.filter(
-      (job) => job.category?.toLowerCase() === selectedCategory.toLowerCase(),
-    );
+    return jobs.filter((job) => job.category_id === selectedCategory);
   }, [jobs, selectedCategory]);
 
   const sections = useMemo(
@@ -107,7 +106,8 @@ function App() {
     if (!cleanedCategory) return;
 
     const alreadyExists = categories.some(
-      (existing) => existing.toLowerCase() === cleanedCategory.toLowerCase(),
+      (existing) =>
+        existing.title.toLowerCase() === cleanedCategory.toLowerCase(),
     );
 
     if (alreadyExists) return;
@@ -115,22 +115,22 @@ function App() {
     try {
       const createdCategory = await create_category(cleanedCategory);
 
-      setCategories((prev) => [...prev, createdCategory.id]);
+      setCategories((prev) => [...prev, createdCategory]);
       setSelectedCategory(createdCategory.id);
     } catch (error) {
       console.error(error);
     }
   }
 
-  async function handleDeleteCategory(category: string) {
-    setCategories((prev) => prev.filter((c) => c !== category));
+  async function handleDeleteCategory(category: Category) {
+    setCategories((prev) => prev.filter((c) => c.id !== category.id));
 
-    if (selectedCategory === category) {
+    if (selectedCategory === category.id) {
       setSelectedCategory("All");
     }
 
     try {
-      await delete_category(category);
+      await delete_category(category.id);
     } catch (error) {
       console.error(error);
       setSelectedCategory("All");
@@ -138,7 +138,7 @@ function App() {
     }
   }
 
-  function handleReorderCategories(nextCategories: string[]) {
+  function handleReorderCategories(nextCategories: Category[]) {
     setCategories(nextCategories);
   }
 
@@ -271,7 +271,11 @@ function App() {
               addJob={addJob}
               jobSection={section}
               close={() => setAddFormShow(false)}
-              category={selectedCategory}
+              category={
+                selectedCategory === "All"
+                  ? null
+                  : (categories.find((c) => c.id === selectedCategory) ?? null)
+              }
             />
 
             <JobWindow

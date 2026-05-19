@@ -11,18 +11,27 @@ class ApplicationStatus(str, Enum):
     archived = "archived"
 
 
+class User(SQLModel, table=True): 
+    id: int | None = Field(default=None, primary_key=True)
+    name: str
+    email: str = Field(index=True, unique=True)
+    password: str
+
+
+class Category(SQLModel, table=True): 
+    id: int | None = Field(default=None, primary_key=True)
+    title: str = Field(index=True)
+    user_id: int = Field(foreign_key="user.id")
+
+
 class JobApplication(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     title: str
     company: str
     location: str
-    salary: int | None
-    description: str | None
-    category: str | None = Field(default=None, foreign_key="category.id")
-    logo: str | None
+    salary: int | None = None
+    description: str | None = None
+    category_id: int | None = Field(default=None, foreign_key="category.id")
+    logo: str | None = None
     status: ApplicationStatus = Field(default=ApplicationStatus.wishlist)
-
-class Category(SQLModel, table=True): 
-    id: str = Field(primary_key=True)
-
-
+    user_id: int = Field(foreign_key="user.id")

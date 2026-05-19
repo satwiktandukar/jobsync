@@ -1,15 +1,14 @@
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 
-from typing import Annotated
-
 from fastapi.staticfiles import StaticFiles
 from PIL import Image
-import glob, os
-from pathlib import Path 
-import random, string
+import os
+from pathlib import Path
+import random
+import string
 
 from services import sql_engine
 from models.models import JobApplication, Category, ApplicationStatus
@@ -18,6 +17,7 @@ from schemas.schemas import (
     JobApplicationCreateSchema,
     JobApplicationUpdateSchema,
     CategorySchema,
+    CategoryCreateSchema,
     LogoResponseSchema,
 )
 
@@ -38,30 +38,29 @@ async def root():
     return {"message": "the app works!"}
 
 
-@app.get("/applications/{id}", response_model=JobApplicationSchema)
-async def get_application(id: int, session: sql_engine.SessionDep):
-    application = session.get(JobApplication, id)
+@app.get("/applications/{application_id}", response_model=JobApplicationSchema)
+async def get_application(application_id: int, session: sql_engine.SessionDep):
+    application = session.get(JobApplication, application_id)
 
     if not application:
         raise HTTPException(status_code=404, detail="Application not found")
 
     return application
 
-@app.get("/applications")
+
+@app.get("/applications", response_model=list[JobApplicationSchema])
 async def get_applications(
     session: sql_engine.SessionDep,
     status: ApplicationStatus | None = None,
-    category: str | None = None,
+    category_id: int | None = None,
 ):
     statement = select(JobApplication)
 
-    if status:
+    if status is not None:
         statement = statement.where(JobApplication.status == status)
 
-    if category:
-        statement = statement.where(
-            JobApplication.category == category.strip().lower()
-        )
+    if category_id is not None:
+        statement = statement.where(JobApplication.category_id == category_id)
 
     return session.exec(statement).all()
 
@@ -71,15 +70,11 @@ async def create_application(
     data: JobApplicationCreateSchema,
     session: sql_engine.SessionDep,
 ):
-    if data.category:
-        category_id = data.category.strip().lower()
-        category = session.get(Category, category_id)
+    if data.category_id is not None:
+        category = session.get(Category, data.category_id)
 
         if not category:
-            session.add(Category(id=category_id))
-
-    else:
-        category_id = None
+            raise HTTPException(status_code=404, detail="Category not found")
 
     application = JobApplication(
         title=data.title,
@@ -87,9 +82,10 @@ async def create_application(
         location=data.location,
         salary=data.salary,
         description=data.description,
-        category=category_id,
+        category_id=data.category_id,
         logo=data.logo,
         status=data.status,
+        user_id=1,  # temporary until auth exists
     )
 
     session.add(application)
@@ -125,15 +121,13 @@ async def update_application(
     if data.description is not None:
         job_application.description = data.description
 
-    if data.category is not None:
-        category_id = data.category.strip().lower()
-
-        category = session.get(Category, category_id)
+    if data.category_id is not None:
+        category = session.get(Category, data.category_id)
 
         if not category:
-            session.add(Category(id=category_id))
+            raise HTTPException(status_code=404, detail="Category not found")
 
-        job_application.category = category_id
+        job_application.category_id = data.category_id
 
     if data.logo is not None:
         job_application.logo = data.logo
@@ -147,12 +141,17 @@ async def update_application(
 
     return job_application
 
+
 @app.delete("/applications/{application_id}", response_model=JobApplicationSchema)
-async def delete_application(application_id: int, session: sql_engine.SessionDep): 
+async def delete_application(
+    application_id: int,
+    session: sql_engine.SessionDep,
+):
     application = session.get(JobApplication, application_id)
-    if (not application): 
+
+    if not application:
         raise HTTPException(status_code=404, detail="Application not found")
-    
+
     session.delete(application)
     session.commit()
 
@@ -166,10 +165,13 @@ async def get_category(session: sql_engine.SessionDep):
 
 @app.post("/category", response_model=CategorySchema, status_code=201)
 async def create_category(
-    data: CategorySchema,
+    data: CategoryCreateSchema,
     session: sql_engine.SessionDep,
 ):
-    category = Category(id=data.id.strip().lower())
+    category = Category(
+        title=data.title.strip().lower(),
+        user_id=1,  # temporary until auth exists
+    )
 
     try:
         session.add(category)
@@ -178,7 +180,6 @@ async def create_category(
 
     except IntegrityError:
         session.rollback()
-
         raise HTTPException(
             status_code=409,
             detail="Category already exists",
@@ -187,40 +188,48 @@ async def create_category(
     return category
 
 
-@app.delete("/category/{id}", response_model=CategorySchema)
-async def delete_category(id: str, session: sql_engine.SessionDep):
-    category = session.get(Category, id)
-    if (not category): 
+@app.delete("/category/{category_id}", response_model=CategorySchema)
+async def delete_category(
+    category_id: int,
+    session: sql_engine.SessionDep,
+):
+    category = session.get(Category, category_id)
+
+    if not category:
         raise HTTPException(status_code=404, detail="Category not found")
-    
+
+    jobs_using_category = session.exec(
+        select(JobApplication).where(JobApplication.category_id == category_id)
+    ).all()
+
+    for job in jobs_using_category:
+        job.category_id = None
+        session.add(job)
+
     session.delete(category)
     session.commit()
 
     return category
 
+
 @app.post("/upload", response_model=LogoResponseSchema)
 async def upload_logo(file: UploadFile = File(...)):
-
     if file.content_type not in ["image/jpeg", "image/png", "image/webp"]:
         raise HTTPException(status_code=400, detail="Invalid image type")
 
     characters = string.ascii_letters + string.digits
-    file_name = ''.join(random.choices(characters, k=12))
+    file_name = "".join(random.choices(characters, k=12))
 
-    size = 128,128
+    size = (128, 128)
     output_dir = Path("static/thumbnails")
     output_dir.mkdir(parents=True, exist_ok=True)
 
-
-    f,ext = os.path.splitext(file.filename)
-    file_path = "static/thumbnails/" + file_name + ext
+    _, ext = os.path.splitext(file.filename)
+    file_path = output_dir / f"{file_name}{ext}"
 
     im = Image.open(file.file)
     im.thumbnail(size)
     im.save(file_path)
     im.close()
 
-
-    return {"message" : f"{file_name}{ext}"}
-
-     
+    return {"message": f"{file_name}{ext}"}

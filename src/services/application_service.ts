@@ -10,7 +10,7 @@ export const BASE_URL = "http://127.0.0.1:8000";
 
 export type GetApplicationsParams = {
   status?: ApplicationStatus;
-  category?: string;
+  category_id?: number;
 };
 
 export class ApiError extends Error {
@@ -29,13 +29,11 @@ async function request<T>(
   upload?: boolean,
 ): Promise<T> {
   let headers: HeadersInit = {
-    ...(init?.body !== undefined ? { "Content-Type": "application/json" } : {}),
+    ...(init?.body !== undefined && !upload
+      ? { "Content-Type": "application/json" }
+      : {}),
     ...init?.headers,
   };
-
-  if (upload) {
-    headers = {};
-  }
 
   const response = await fetch(`${BASE_URL}${path}`, {
     ...init,
@@ -72,10 +70,17 @@ export async function get_applications(
   params?: GetApplicationsParams,
 ): Promise<Job[]> {
   const searchParams = new URLSearchParams();
-  if (params?.status) searchParams.set("status", params.status);
-  if (params?.category) searchParams.set("category", params.category);
+
+  if (params?.status) {
+    searchParams.set("status", params.status);
+  }
+
+  if (params?.category_id !== undefined) {
+    searchParams.set("category_id", String(params.category_id));
+  }
 
   const query = searchParams.toString();
+
   return request<Job[]>(`/applications${query ? `?${query}` : ""}`);
 }
 
@@ -112,22 +117,25 @@ export async function get_categories(): Promise<Category[]> {
   return request<Category[]>("/category");
 }
 
-export async function create_category(id: string): Promise<Category> {
+export async function create_category(title: string): Promise<Category> {
   return request<Category>("/category", {
     method: "POST",
-    body: JSON.stringify({ id }),
+    body: JSON.stringify({ title }),
   });
 }
 
-export async function delete_category(id: string): Promise<Category> {
+export async function delete_category(id: number): Promise<Category> {
   return request<Category>(`/category/${id}`, {
     method: "DELETE",
   });
 }
 
-export async function upload_logo_image(file: File) {
+// --- Uploads ---
+
+export async function upload_logo_image(file: File): Promise<string> {
   const formData = new FormData();
   formData.append("file", file);
+
   const jsonData = await request<{ message: string }>(
     "/upload",
     {
