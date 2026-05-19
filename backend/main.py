@@ -1,7 +1,9 @@
-from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi import FastAPI, HTTPException, UploadFile, File, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
+
+from typing import Annotated
 
 from fastapi.staticfiles import StaticFiles
 from PIL import Image
@@ -11,7 +13,12 @@ import random
 import string
 
 from services import sql_engine
-from models.models import JobApplication, Category, ApplicationStatus
+
+from auth.auth import oauth2_scheme, get_current_user, get_current_active_user
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+
+
+from models.models import JobApplication, Category, ApplicationStatus, User
 from schemas.schemas import (
     JobApplicationSchema,
     JobApplicationCreateSchema,
@@ -19,6 +26,8 @@ from schemas.schemas import (
     CategorySchema,
     CategoryCreateSchema,
     LogoResponseSchema,
+    UserSchema, 
+    UserCreateSchema
 )
 
 app = FastAPI()
@@ -39,9 +48,10 @@ async def root():
 
 
 @app.get("/applications/{application_id}", response_model=JobApplicationSchema)
-async def get_application(application_id: int, session: sql_engine.SessionDep):
+async def get_application(current_user: Annotated[UserSchema, Depends(get_current_user)], application_id: int, session: sql_engine.SessionDep):
     application = session.get(JobApplication, application_id)
 
+    print(current_user)
     if not application:
         raise HTTPException(status_code=404, detail="Application not found")
 
@@ -233,3 +243,40 @@ async def upload_logo(file: UploadFile = File(...)):
     im.close()
 
     return {"message": f"{file_name}{ext}"}
+
+@app.post("/register")
+async def register(data: UserCreateSchema, session: sql_engine.SessionDep): 
+    user_data = User(name = data.name.strip(), email = data.email.strip(), password = data.password)
+    try:
+        session.add(user_data)
+        session.commit()
+        session.refresh(user_data)
+
+    except IntegrityError:
+        session.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="User already exists",
+        )
+
+    return {"message": "Succeeded"}
+
+
+@app.post("/token")
+async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
+    user_dict = fake_users_db.get(form_data.username)
+    if not user_dict:
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
+    user = UserInDB(**user_dict)
+    hashed_password = fake_hash_password(form_data.password)
+    if not hashed_password == user.hashed_password:
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
+
+    return {"access_token": user.username, "token_type": "bearer"}
+
+
+@app.get("/users/me")
+async def read_users_me(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    return current_user
