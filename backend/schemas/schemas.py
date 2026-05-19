@@ -37,3 +37,5 @@ class CategorySchema(BaseModel):
     id: str
 
 
+class LogoResponseSchema(BaseModel): 
+    message: str

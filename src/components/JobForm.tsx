@@ -5,13 +5,19 @@ import {
   Container,
   Modal,
   Snackbar,
+  styled,
   TextField,
   Typography,
 } from "@mui/material";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+
 import { useState } from "react";
 import type { Job, JobCreate } from "../types/Job";
 import { sectionToStatus, type SectionName } from "../utils/jobStatus";
-import { create_application } from "../services/application_service";
+import {
+  create_application,
+  upload_logo_image,
+} from "../services/application_service";
 
 type JobFormProps = {
   open: boolean;
@@ -36,6 +42,18 @@ const fieldSx = {
   label: { color: "white" },
   paddingBottom: "10px",
 };
+
+const VisuallyHiddenInput = styled("input")({
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  height: 1,
+  overflow: "hidden",
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  whiteSpace: "nowrap",
+  width: 1,
+});
 
 export default function JobForm({
   open,
@@ -110,6 +128,30 @@ export default function JobForm({
       });
     }
   }
+
+  const uploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    const allowedTypes = ["image/png", "image/jpeg", "image/gif"];
+
+    if (!allowedTypes.includes(file.type)) {
+      setSnackbar({
+        open: true,
+        message: "Only PNG, JPEG, and GIF images are allowed",
+        severity: "error",
+      });
+      return;
+    }
+
+    const logo_url = await upload_logo_image(file);
+
+    setData((prev) => ({
+      ...prev,
+      logo: logo_url,
+    }));
+  };
 
   return (
     <>
@@ -190,24 +232,50 @@ export default function JobForm({
               rows={4}
             />
 
-            {/* <TextField
-              name="category"
-              label="Category"
-              value={data.category}
-              onChange={handleChange}
-              sx={fieldSx}
-              fullWidth
-            /> */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                mt: 1,
+              }}
+            >
+              <Button
+                component="label"
+                variant="contained"
+                startIcon={<CloudUploadIcon />}
+                sx={{ borderRadius: "20px" }}
+              >
+                Upload Logo
+                <VisuallyHiddenInput
+                  type="file"
+                  accept=".jpg,.jpeg,.png,.gif"
+                  onChange={uploadImage}
+                />
+              </Button>
 
-            <TextField
-              name="logo"
-              label="Logo URL"
-              value={data.logo}
-              onChange={handleChange}
-              sx={fieldSx}
-              fullWidth
-            />
+              {data.logo && (
+                <>
+                  <Typography variant="body2" color="success.light">
+                    Upload successful
+                  </Typography>
 
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    size="small"
+                    onClick={() =>
+                      setData((prev) => ({
+                        ...prev,
+                        logo: "",
+                      }))
+                    }
+                  >
+                    Delete
+                  </Button>
+                </>
+              )}
+            </Box>
             <Box sx={{ padding: "20px" }}>
               <Button
                 variant="contained"

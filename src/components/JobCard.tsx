@@ -2,6 +2,7 @@ import { Avatar, Box, Paper, Typography } from "@mui/material";
 import { useDraggable } from "@dnd-kit/react";
 
 import viteLogo from "/img.jpg";
+import { BASE_URL } from "../services/application_service";
 
 import type { Job } from "../types/Job";
 
@@ -104,7 +105,7 @@ export default function JobCard({
             }}
           >
             <Avatar
-              src={job.logo || viteLogo}
+              src={`${BASE_URL}/static/thumbnails/${job.logo}`}
               sx={{
                 width: 46,
                 height: 46,

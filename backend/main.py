@@ -1,7 +1,15 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
+
+from typing import Annotated
+
+from fastapi.staticfiles import StaticFiles
+from PIL import Image
+import glob, os
+from pathlib import Path 
+import random, string
 
 from services import sql_engine
 from models.models import JobApplication, Category, ApplicationStatus
@@ -10,9 +18,11 @@ from schemas.schemas import (
     JobApplicationCreateSchema,
     JobApplicationUpdateSchema,
     CategorySchema,
+    LogoResponseSchema,
 )
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.add_middleware(
     CORSMiddleware,
@@ -187,3 +197,30 @@ async def delete_category(id: str, session: sql_engine.SessionDep):
     session.commit()
 
     return category
+
+@app.post("/upload", response_model=LogoResponseSchema)
+async def upload_logo(file: UploadFile = File(...)):
+
+    if file.content_type not in ["image/jpeg", "image/png", "image/webp"]:
+        raise HTTPException(status_code=400, detail="Invalid image type")
+
+    characters = string.ascii_letters + string.digits
+    file_name = ''.join(random.choices(characters, k=12))
+
+    size = 128,128
+    output_dir = Path("static/thumbnails")
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+
+    f,ext = os.path.splitext(file.filename)
+    file_path = "static/thumbnails/" + file_name + ext
+
+    im = Image.open(file.file)
+    im.thumbnail(size)
+    im.save(file_path)
+    im.close()
+
+
+    return {"message" : f"{file_name}{ext}"}
+
+     

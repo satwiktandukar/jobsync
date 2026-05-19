@@ -6,7 +6,7 @@ import type {
   JobUpdate,
 } from "../types/Job";
 
-const BASE_URL = "http://127.0.0.1:8000";
+export const BASE_URL = "http://127.0.0.1:8000";
 
 export type GetApplicationsParams = {
   status?: ApplicationStatus;
@@ -23,11 +23,19 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const headers: HeadersInit = {
+async function request<T>(
+  path: string,
+  init?: RequestInit,
+  upload?: boolean,
+): Promise<T> {
+  let headers: HeadersInit = {
     ...(init?.body !== undefined ? { "Content-Type": "application/json" } : {}),
     ...init?.headers,
   };
+
+  if (upload) {
+    headers = {};
+  }
 
   const response = await fetch(`${BASE_URL}${path}`, {
     ...init,
@@ -115,4 +123,19 @@ export async function delete_category(id: string): Promise<Category> {
   return request<Category>(`/category/${id}`, {
     method: "DELETE",
   });
+}
+
+export async function upload_logo_image(file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+  const jsonData = await request<{ message: string }>(
+    "/upload",
+    {
+      method: "POST",
+      body: formData,
+    },
+    true,
+  );
+
+  return jsonData.message;
 }
