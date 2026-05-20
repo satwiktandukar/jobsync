@@ -1,10 +1,14 @@
-# Job Application Tracker (Work in progress - Not Production Ready)
+# Job Application Tracker (Work in Progress - Not Production Ready)
 
 A Kanban-style full-stack job search tracker built to manage real job applications from wishlist to archive.
 
-This project is designed as a portfolio-grade app to demonstrate practical React + TypeScript + UI architecture skills for full-stack roles.
+This project was built to practice modern full-stack application architecture, UI workflows, and rapid feature iteration using React, TypeScript, and FastAPI.
 
-## Why I built this
+## Screenshots
+
+![JobFlow Dashboard](screenshots/main-dashboard.png)
+
+## Why I Built This
 
 Applying for jobs across multiple platforms gets messy fast. I wanted a focused tool where I can:
 
@@ -20,7 +24,10 @@ Applying for jobs across multiple platforms gets messy fast. I wanted a focused 
 - Add new job entries with form modal
 - Job details side panel/window
 - Light/Dark mode toggle
-- Responsive horizontal board layout with hidden scrollbars
+- Responsive horizontal board layout
+- Category-based organization
+- Image/logo upload support
+- Frontend/backend API integration
 
 ## Tech Stack
 
@@ -32,6 +39,13 @@ Applying for jobs across multiple platforms gets messy fast. I wanted a focused 
 - Material UI (MUI)
 - dnd-kit (`@dnd-kit/react`)
 
+### Backend
+
+- FastAPI
+- SQLAlchemy
+- SQLite
+- Pillow
+
 ### Tooling
 
 - ESLint
@@ -41,19 +55,28 @@ Applying for jobs across multiple platforms gets messy fast. I wanted a focused 
 
 ```text
 src/
-  components/
-    Navbar.tsx
-    JobSection.tsx
-    JobCard.tsx
-    JobForm.tsx
-    JobWindow.tsx
-  services/
-    application_service.ts
-  types/
-    Job.ts
-  demoData.ts
-  App.tsx
-  main.tsx
+├── components/
+├── services/
+├── types/
+├── utils/
+├── App.tsx
+└── main.tsx
+
+backend/
+├── api/
+├── auth/
+├── db/
+├── models/
+├── repositories/
+├── schemas/
+├── services/
+├── static/
+│   └── thumbnails/
+└── main.py
+
+screenshots/
+public/
+README.md
 ```
 
 ## Getting Started
@@ -81,30 +104,37 @@ Open the local URL shown in your terminal (usually `http://localhost:5173`).
 
 ## Scripts
 
-- `npm run dev` - Start local dev server
-- `npm run build` - Type-check and build for production
-- `npm run preview` - Preview production build locally
-- `npm run lint` - Run ESLint
+- `npm run dev` — Start local development server
+- `npm run build` — Type-check and build for production
+- `npm run preview` — Preview production build locally
+- `npm run lint` — Run ESLint
 
-## Demo
+## Status
 
-Add these after deployment:
+Currently under active development.
 
-- Live app: `<paste-live-url>`
-- Demo video (60-90 seconds): `<paste-video-url>`
+Planned next steps:
 
-## What I would improve next
+- Authentication and user accounts
+- Persistent cloud database
+- User-specific application data separation
+- Search/filtering and analytics
+- CI/CD pipeline
+- Improved mobile responsiveness
 
-- Persist data with a backend API + database
-- Add authentication
-- Add filtering/search and analytics (conversion by stage)
-- Add test coverage (component + integration)
-- Add CI pipeline for lint/build/test checks
+## What I Learned
 
-## Portfolio/CV blurb
+- Building reusable typed React components
+- Managing frontend/backend integration
+- Structuring API services cleanly
+- Implementing drag-and-drop workflows
+- Handling relational data models
+- Iterating quickly while maintaining readable architecture
 
-Built a job application tracker using React, TypeScript, MUI, and dnd-kit to manage end-to-end job pipelines across six stages. Implemented drag-and-drop workflows, reusable typed components, and dark-mode theming with clean state management and production build tooling.
+## Portfolio / CV Blurb
+
+Built a full-stack job application tracker using React, TypeScript, FastAPI, SQLAlchemy, and Material UI. Implemented drag-and-drop workflows, image upload handling, reusable typed components, frontend/backend API integration, and responsive Kanban-style UI architecture.
 
 ## License
 
-MIT (or your preferred license)
+MIT
