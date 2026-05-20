@@ -22,7 +22,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
 # openssl rand -hex 32
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")

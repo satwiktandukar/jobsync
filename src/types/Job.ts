@@ -31,3 +31,19 @@ export type Category = {
   id: number;
   title: string;
 };
+
+export type UserCreate = {
+  username: string;
+  name: string;
+  password: string;
+  email: string;
+};
+
+export type User = Omit<UserCreate, "password">;
+
+// export type UserLogin = Omit<UserCreate, "email" & "name">;
+
+export type Token = {
+  access_token: string;
+  token_type: string;
+};

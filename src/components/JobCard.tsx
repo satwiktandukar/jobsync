@@ -1,7 +1,6 @@
 import { Avatar, Box, Paper, Typography } from "@mui/material";
 import { useDraggable } from "@dnd-kit/react";
 
-import viteLogo from "/img.jpg";
 import { BASE_URL } from "../services/application_service";
 
 import type { Job } from "../types/Job";

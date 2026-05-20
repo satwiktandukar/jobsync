@@ -1,9 +1,12 @@
-import type {
-  ApplicationStatus,
-  Category,
-  Job,
-  JobCreate,
-  JobUpdate,
+import {
+  type ApplicationStatus,
+  type Category,
+  type Job,
+  type JobCreate,
+  type JobUpdate,
+  type Token,
+  type User,
+  type UserCreate,
 } from "../types/Job";
 
 export const BASE_URL = "http://127.0.0.1:8000";
@@ -28,10 +31,20 @@ async function request<T>(
   init?: RequestInit,
   upload?: boolean,
 ): Promise<T> {
+  //check for jwt:
+  let token_header = {};
+
+  if (localStorage.getItem("jwt-token")) {
+    token_header = {
+      Authorization: `${localStorage.getItem("token-type")} ${localStorage.getItem("jwt-token")}`,
+    };
+  }
+
   let headers: HeadersInit = {
     ...(init?.body !== undefined && !upload
       ? { "Content-Type": "application/json" }
       : {}),
+    ...token_header,
     ...init?.headers,
   };
 
@@ -39,6 +52,13 @@ async function request<T>(
     ...init,
     headers,
   });
+
+  if (response.status === 401) {
+    localStorage.removeItem("jwt-token");
+    localStorage.removeItem("token-type");
+
+    window.location.href = "/auth";
+  }
 
   if (!response.ok) {
     let message = `Request failed (${response.status})`;
@@ -146,4 +166,27 @@ export async function upload_logo_image(file: File): Promise<string> {
   );
 
   return jsonData.message;
+}
+
+// -- Users --
+
+export async function register(user: UserCreate): Promise<User> {
+  return request<User>("/register", {
+    method: "POST",
+    body: JSON.stringify(user),
+  });
+}
+
+export async function login(user: FormData): Promise<Token> {
+  const token = await request<Token>(
+    "/token",
+    {
+      method: "POST",
+      body: user,
+    },
+    true,
+  );
+  localStorage.setItem("jwt-token", token.access_token);
+  localStorage.setItem("token-type", token.token_type);
+  return token;
 }

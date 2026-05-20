@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { DragDropProvider } from "@dnd-kit/react";
-import "./App.css";
+import "../App.css";
 
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
@@ -13,26 +13,26 @@ import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 
-import JobForm from "./components/JobForm";
-import JobSection from "./components/JobSection";
-import JobWindow from "./components/JobWindow";
-import Navbar from "./components/Navbar";
+import JobForm from "../components/JobForm";
+import JobSection from "../components/JobSection";
+import JobWindow from "../components/JobWindow";
+import Navbar from "../components/Navbar";
 
-import type { Job, JobUpdate, Category } from "./types/Job";
-import { demoJobs } from "./demoData";
+import type { Job, JobUpdate, Category } from "../types/Job";
+import { demoJobs } from "../demoData";
 import {
   create_category,
   delete_category,
   get_applications,
   get_categories,
   update_application,
-} from "./services/application_service";
+} from "../services/application_service";
 import {
   SECTIONS,
   sectionToStatus,
   statusToSection,
   type SectionName,
-} from "./utils/jobStatus";
+} from "../utils/jobStatus";
 
 function App() {
   const empty_job: Job = {

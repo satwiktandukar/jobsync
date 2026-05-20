@@ -322,7 +322,7 @@ async def register(data: UserCreateSchema, session: sql_engine.SessionDep):
             detail="Username already Taken.",
         )
 
-    return {"message": user.username}
+    return User(name=user.name, username=user.username, email=user.email)
 
 
 @app.post("/token")
