@@ -51,11 +51,21 @@ class LogoResponseSchema(BaseModel):
 
 class UserCreateSchema(BaseModel):
     name: str
+    username: str
     email: str
     password: str
 
 
 class UserSchema(BaseModel): 
     id: int
+    username: str
     name: str
     email: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    username: str | None = None
+

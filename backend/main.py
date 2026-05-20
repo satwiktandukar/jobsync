@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, UploadFile, File, Depends
+from fastapi import FastAPI, HTTPException, UploadFile, File, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
@@ -14,9 +14,10 @@ import string
 
 from services import sql_engine
 
-from auth.auth import oauth2_scheme, get_current_user, get_current_active_user
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from datetime import timedelta
 
+from auth.auth import get_current_user, authenticate_user, password_hash, create_access_token
+from fastapi.security import OAuth2PasswordRequestForm
 
 from models.models import JobApplication, Category, ApplicationStatus, User
 from schemas.schemas import (
@@ -26,9 +27,11 @@ from schemas.schemas import (
     CategorySchema,
     CategoryCreateSchema,
     LogoResponseSchema,
-    UserSchema, 
-    UserCreateSchema
+    UserCreateSchema,
+    Token,
 )
+
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7 #7days expiry time 
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -41,6 +44,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+CurrentUserDep = Annotated[User, Depends(get_current_user)]
+
 
 @app.get("/")
 async def root():
@@ -48,10 +53,18 @@ async def root():
 
 
 @app.get("/applications/{application_id}", response_model=JobApplicationSchema)
-async def get_application(current_user: Annotated[UserSchema, Depends(get_current_user)], application_id: int, session: sql_engine.SessionDep):
-    application = session.get(JobApplication, application_id)
+async def get_application(
+    application_id: int,
+    session: sql_engine.SessionDep,
+    current_user: CurrentUserDep,
+):
+    application = session.exec(
+        select(JobApplication).where(
+            JobApplication.id == application_id,
+            JobApplication.user_id == current_user.id,
+        )
+    ).first()
 
-    print(current_user)
     if not application:
         raise HTTPException(status_code=404, detail="Application not found")
 
@@ -61,10 +74,13 @@ async def get_application(current_user: Annotated[UserSchema, Depends(get_curren
 @app.get("/applications", response_model=list[JobApplicationSchema])
 async def get_applications(
     session: sql_engine.SessionDep,
+    current_user: CurrentUserDep,
     status: ApplicationStatus | None = None,
     category_id: int | None = None,
 ):
-    statement = select(JobApplication)
+    statement = select(JobApplication).where(
+        JobApplication.user_id == current_user.id
+    )
 
     if status is not None:
         statement = statement.where(JobApplication.status == status)
@@ -79,9 +95,15 @@ async def get_applications(
 async def create_application(
     data: JobApplicationCreateSchema,
     session: sql_engine.SessionDep,
+    current_user: CurrentUserDep,
 ):
     if data.category_id is not None:
-        category = session.get(Category, data.category_id)
+        category = session.exec(
+            select(Category).where(
+                Category.id == data.category_id,
+                Category.user_id == current_user.id,
+            )
+        ).first()
 
         if not category:
             raise HTTPException(status_code=404, detail="Category not found")
@@ -95,7 +117,7 @@ async def create_application(
         category_id=data.category_id,
         logo=data.logo,
         status=data.status,
-        user_id=1,  # temporary until auth exists
+        user_id=current_user.id,
     )
 
     session.add(application)
@@ -110,8 +132,14 @@ async def update_application(
     application_id: int,
     data: JobApplicationUpdateSchema,
     session: sql_engine.SessionDep,
+    current_user: CurrentUserDep,
 ):
-    job_application = session.get(JobApplication, application_id)
+    job_application = session.exec(
+        select(JobApplication).where(
+            JobApplication.id == application_id,
+            JobApplication.user_id == current_user.id,
+        )
+    ).first()
 
     if not job_application:
         raise HTTPException(status_code=404, detail="Application not found")
@@ -132,7 +160,12 @@ async def update_application(
         job_application.description = data.description
 
     if data.category_id is not None:
-        category = session.get(Category, data.category_id)
+        category = session.exec(
+            select(Category).where(
+                Category.id == data.category_id,
+                Category.user_id == current_user.id,
+            )
+        ).first()
 
         if not category:
             raise HTTPException(status_code=404, detail="Category not found")
@@ -156,8 +189,14 @@ async def update_application(
 async def delete_application(
     application_id: int,
     session: sql_engine.SessionDep,
+    current_user: CurrentUserDep,
 ):
-    application = session.get(JobApplication, application_id)
+    application = session.exec(
+        select(JobApplication).where(
+            JobApplication.id == application_id,
+            JobApplication.user_id == current_user.id,
+        )
+    ).first()
 
     if not application:
         raise HTTPException(status_code=404, detail="Application not found")
@@ -169,18 +208,24 @@ async def delete_application(
 
 
 @app.get("/category", response_model=list[CategorySchema])
-async def get_category(session: sql_engine.SessionDep):
-    return session.exec(select(Category)).all()
+async def get_category(
+    session: sql_engine.SessionDep,
+    current_user: CurrentUserDep,
+):
+    return session.exec(
+        select(Category).where(Category.user_id == current_user.id)
+    ).all()
 
 
 @app.post("/category", response_model=CategorySchema, status_code=201)
 async def create_category(
     data: CategoryCreateSchema,
     session: sql_engine.SessionDep,
+    current_user: CurrentUserDep,
 ):
     category = Category(
         title=data.title.strip().lower(),
-        user_id=1,  # temporary until auth exists
+        user_id=current_user.id,
     )
 
     try:
@@ -202,14 +247,23 @@ async def create_category(
 async def delete_category(
     category_id: int,
     session: sql_engine.SessionDep,
+    current_user: CurrentUserDep,
 ):
-    category = session.get(Category, category_id)
+    category = session.exec(
+        select(Category).where(
+            Category.id == category_id,
+            Category.user_id == current_user.id,
+        )
+    ).first()
 
     if not category:
         raise HTTPException(status_code=404, detail="Category not found")
 
     jobs_using_category = session.exec(
-        select(JobApplication).where(JobApplication.category_id == category_id)
+        select(JobApplication).where(
+            JobApplication.category_id == category_id,
+            JobApplication.user_id == current_user.id,
+        )
     ).all()
 
     for job in jobs_using_category:
@@ -244,39 +298,57 @@ async def upload_logo(file: UploadFile = File(...)):
 
     return {"message": f"{file_name}{ext}"}
 
+
 @app.post("/register")
-async def register(data: UserCreateSchema, session: sql_engine.SessionDep): 
-    user_data = User(name = data.name.strip(), email = data.email.strip(), password = data.password)
+async def register(data: UserCreateSchema, session: sql_engine.SessionDep):
+    hashed_password = password_hash.hash(data.password)
+
+    user = User(
+        name=data.name.strip(),
+        username=data.username.strip(),
+        email=data.email.strip(),
+        password=hashed_password,
+    )
+
     try:
-        session.add(user_data)
+        session.add(user)
         session.commit()
-        session.refresh(user_data)
+        session.refresh(user)
 
     except IntegrityError:
         session.rollback()
         raise HTTPException(
             status_code=409,
-            detail="User already exists",
+            detail="Username already Taken.",
         )
 
-    return {"message": "Succeeded"}
+    return {"message": user.username}
 
 
 @app.post("/token")
-async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
-    user_dict = fake_users_db.get(form_data.username)
-    if not user_dict:
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
-    user = UserInDB(**user_dict)
-    hashed_password = fake_hash_password(form_data.password)
-    if not hashed_password == user.hashed_password:
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
+async def login_for_access_token(
+    session: sql_engine.SessionDep,
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+) -> Token:
+    user = authenticate_user(form_data.username, form_data.password, session)
 
-    return {"access_token": user.username, "token_type": "bearer"}
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+
+    access_token = create_access_token(
+        data={"sub": user.username},
+        expires_delta=access_token_expires,
+    )
+
+    return Token(access_token=access_token, token_type="bearer")
 
 
 @app.get("/users/me")
-async def read_users_me(
-    current_user: Annotated[User, Depends(get_current_active_user)],
-):
+async def read_users_me(current_user: CurrentUserDep):
     return current_user
