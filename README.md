@@ -1,4 +1,4 @@
-# Job Application Tracker
+# Job Application Tracker (Work in progress - Not Production Ready)
 
 A Kanban-style full-stack job search tracker built to manage real job applications from wishlist to archive.
 
