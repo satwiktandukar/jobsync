@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, UploadFile, File, Depends, status
+from fastapi import FastAPI, HTTPException, UploadFile, File, Depends, status, Header
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
@@ -16,7 +16,7 @@ from services import sql_engine
 
 from datetime import timedelta
 
-from auth.auth import get_current_user, authenticate_user, password_hash, create_access_token
+from auth.auth import get_current_user, authenticate_user, password_hash, create_access_token, revoked_tokens
 from fastapi.security import OAuth2PasswordRequestForm
 
 from models.models import JobApplication, Category, ApplicationStatus, User
@@ -45,7 +45,6 @@ app.add_middleware(
 )
 
 CurrentUserDep = Annotated[User, Depends(get_current_user)]
-
 
 @app.get("/")
 async def root():
@@ -310,6 +309,8 @@ async def register(data: UserCreateSchema, session: sql_engine.SessionDep):
         password=hashed_password,
     )
 
+    #check if the user already exists
+
     try:
         session.add(user)
         session.commit()
@@ -322,7 +323,7 @@ async def register(data: UserCreateSchema, session: sql_engine.SessionDep):
             detail="Username already Taken.",
         )
 
-    return User(name=user.name, username=user.username, email=user.email)
+    return user
 
 
 @app.post("/token")
@@ -349,6 +350,7 @@ async def login_for_access_token(
     return Token(access_token=access_token, token_type="bearer")
 
 
-@app.get("/users/me")
+@app.get("/user/")
 async def read_users_me(current_user: CurrentUserDep):
-    return current_user
+    return ({"name": current_user.name, "username": current_user.username, "email": current_user.email})
+

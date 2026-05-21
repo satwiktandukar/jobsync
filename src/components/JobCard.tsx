@@ -1,5 +1,6 @@
 import { Avatar, Box, Paper, Typography } from "@mui/material";
 import { useDraggable } from "@dnd-kit/react";
+import BusinessIcon from "@mui/icons-material/Business";
 
 import { BASE_URL } from "../services/application_service";
 
@@ -104,12 +105,18 @@ export default function JobCard({
             }}
           >
             <Avatar
-              src={`${BASE_URL}/static/thumbnails/${job.logo}`}
+              src={
+                job.logo
+                  ? `${BASE_URL}/static/thumbnails/${job.logo}`
+                  : undefined
+              }
               sx={{
                 width: 46,
                 height: 46,
               }}
-            />
+            >
+              {!job.logo && <BusinessIcon />}
+            </Avatar>
 
             <Box
               sx={{

@@ -3,12 +3,14 @@ import {
   Box,
   Button,
   Container,
+  MenuItem,
   Modal,
   Snackbar,
+  TextField,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import type { Job, JobUpdate } from "../types/Job";
+import type { Category, Job, JobUpdate } from "../types/Job";
 import { update_application } from "../services/application_service";
 import TextFieldJob from "./TextfieldJob";
 
@@ -17,6 +19,7 @@ type JobWindowProps = {
   onClose: () => void;
   job: Job;
   onJobUpdated: (job: Job) => void;
+  categories: Category[];
 };
 
 function jobToForm(job: Job) {
@@ -36,6 +39,7 @@ export default function JobWindow({
   onClose,
   job,
   onJobUpdated,
+  categories,
 }: JobWindowProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [data, setData] = useState(() => jobToForm(job));
@@ -191,13 +195,23 @@ export default function JobWindow({
               isEditing={isEditing}
             />
 
-            <TextFieldJob
+            <TextField
+              select
+              fullWidth
               name="category_id"
               label="Category"
               value={data.category_id}
-              handleChange={handleChange}
-              isEditing={isEditing}
-            />
+              onChange={handleChange}
+              disabled={!isEditing}
+            >
+              <MenuItem value="">No category</MenuItem>
+
+              {categories.map((category) => (
+                <MenuItem key={category.id} value={String(category.id)}>
+                  {category.title}
+                </MenuItem>
+              ))}
+            </TextField>
 
             <TextFieldJob
               name="logo"
@@ -221,6 +235,7 @@ export default function JobWindow({
           </form>
         </Container>
       </Modal>
+
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}

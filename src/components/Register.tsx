@@ -13,6 +13,8 @@ import { styled } from "@mui/material/styles";
 
 import type { UserCreate } from "../types/Job";
 import { register } from "../services/application_service";
+import { Alert, Snackbar, SnackbarContent } from "@mui/material";
+import { Navigate, useNavigate } from "react-router";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -33,6 +35,8 @@ const Card = styled(MuiCard)(({ theme }) => ({
 }));
 
 export default function RegisterPage() {
+  const navigate = useNavigate();
+
   const [emailError, setEmailError] = React.useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = React.useState("");
 
@@ -42,11 +46,24 @@ export default function RegisterPage() {
   const [usernameError, setUsernameError] = React.useState(false);
   const [usernameErrorMessage, setUsernameErrorMessage] = React.useState("");
 
+  const [snackbar, setSnackbar] = React.useState({
+    open: false,
+    message: "",
+    severity: "success" as "success" | "error" | "info" | "warning",
+  });
+
+  function handleSnackbarClose() {
+    setSnackbar((prev) => ({
+      ...prev,
+      open: false,
+    }));
+  }
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    if (emailError || passwordError) {
-      event.preventDefault();
-      return;
-    }
+    event.preventDefault();
+
+    const isValid = validateInputs();
+
+    if (!isValid) return;
 
     const data: UserCreate = {
       email: event.currentTarget.email.value,
@@ -55,9 +72,24 @@ export default function RegisterPage() {
       name: event.currentTarget.nickname.value,
     };
 
-    const response = await register(data);
+    try {
+      await register(data);
 
-    console.log(response.username);
+      setSnackbar({
+        open: true,
+        message: "Account Created. Redirecting you to Login",
+        severity: "success",
+      });
+      setTimeout(() => {
+        navigate("/auth/login");
+      }, 1000);
+    } catch {
+      setSnackbar({
+        open: true,
+        message: "User account with this email or username already exists.",
+        severity: "error",
+      });
+    }
   };
 
   const validateInputs = () => {
@@ -97,114 +129,128 @@ export default function RegisterPage() {
   };
 
   return (
-    <Card variant="outlined">
-      <Typography
-        component="h1"
-        variant="h4"
-        sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}
-      >
-        Sign Up
-      </Typography>
-      <Box
-        component="form"
-        onSubmit={handleSubmit}
-        noValidate
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          width: "100%",
-          gap: 2,
-        }}
-      >
-        <FormControl>
-          <FormLabel htmlFor="text">Username</FormLabel>
-          <TextField
-            error={usernameError}
-            helperText={usernameErrorMessage}
-            id="username"
-            type="text"
-            name="username"
-            placeholder="user_name"
-            autoComplete="username"
-            autoFocus
-            required
-            fullWidth
-            variant="outlined"
-            color={emailError ? "error" : "primary"}
-          />
-        </FormControl>
-        <FormControl>
-          <FormLabel htmlFor="text">Name</FormLabel>
-          <TextField
-            helperText={""}
-            id="name"
-            type="text"
-            name="nickname"
-            placeholder="John Doe"
-            autoComplete="name"
-            autoFocus
-            required
-            fullWidth
-            variant="outlined"
-            color={emailError ? "error" : "primary"}
-          />
-        </FormControl>
-        <FormControl>
-          <FormLabel htmlFor="email">Email</FormLabel>
-          <TextField
-            error={emailError}
-            helperText={emailErrorMessage}
-            id="email"
-            type="email"
-            name="email"
-            placeholder="your@email.com"
-            autoComplete="email"
-            autoFocus
-            required
-            fullWidth
-            variant="outlined"
-            color={emailError ? "error" : "primary"}
-          />
-        </FormControl>
-        <FormControl>
-          <FormLabel htmlFor="password">Password</FormLabel>
-          <TextField
-            error={passwordError}
-            helperText={passwordErrorMessage}
-            name="password"
-            placeholder="••••••"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            autoFocus
-            required
-            fullWidth
-            variant="outlined"
-            color={passwordError ? "error" : "primary"}
-          />
-        </FormControl>
-
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          onClick={validateInputs}
+    <>
+      <Card variant="outlined">
+        <Typography
+          component="h1"
+          variant="h4"
+          sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}
         >
           Sign Up
-        </Button>
-        <Typography sx={{ textAlign: "center" }}>
-          Already have an account?{" "}
-          <span>
-            <Link
-              href="/auth/login"
-              variant="body2"
-              sx={{ alignSelf: "center" }}
-            >
-              Sign In
-            </Link>
-          </span>
         </Typography>
-      </Box>
-    </Card>
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          noValidate
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            gap: 2,
+          }}
+        >
+          <FormControl>
+            <FormLabel htmlFor="text">Username</FormLabel>
+            <TextField
+              error={usernameError}
+              helperText={usernameErrorMessage}
+              id="username"
+              type="text"
+              name="username"
+              placeholder="user_name"
+              autoComplete="username"
+              autoFocus
+              required
+              fullWidth
+              variant="outlined"
+              color={emailError ? "error" : "primary"}
+            />
+          </FormControl>
+          <FormControl>
+            <FormLabel htmlFor="text">Name</FormLabel>
+            <TextField
+              helperText={""}
+              id="name"
+              type="text"
+              name="nickname"
+              placeholder="John Doe"
+              autoComplete="name"
+              autoFocus
+              required
+              fullWidth
+              variant="outlined"
+              color={emailError ? "error" : "primary"}
+            />
+          </FormControl>
+          <FormControl>
+            <FormLabel htmlFor="email">Email</FormLabel>
+            <TextField
+              error={emailError}
+              helperText={emailErrorMessage}
+              id="email"
+              type="email"
+              name="email"
+              placeholder="your@email.com"
+              autoComplete="email"
+              autoFocus
+              required
+              fullWidth
+              variant="outlined"
+              color={emailError ? "error" : "primary"}
+            />
+          </FormControl>
+          <FormControl>
+            <FormLabel htmlFor="password">Password</FormLabel>
+            <TextField
+              error={passwordError}
+              helperText={passwordErrorMessage}
+              name="password"
+              placeholder="••••••"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              autoFocus
+              required
+              fullWidth
+              variant="outlined"
+              color={passwordError ? "error" : "primary"}
+            />
+          </FormControl>
+
+          <Button type="submit" fullWidth variant="contained">
+            Sign Up
+          </Button>
+          <Typography sx={{ textAlign: "center" }}>
+            Already have an account?{" "}
+            <span>
+              <Link
+                href="/auth/login"
+                variant="body2"
+                sx={{ alignSelf: "center" }}
+              >
+                Sign In
+              </Link>
+            </span>
+          </Typography>
+        </Box>
+      </Card>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbar.severity}
+          variant="filled"
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </>
   );
 }

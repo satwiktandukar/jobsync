@@ -11,6 +11,9 @@ import {
 
 export const BASE_URL = "http://127.0.0.1:8000";
 
+const ACCESS_TOKEN_KEY = "jwt-token";
+const TOKEN_TYPE_KEY = "token-type";
+
 export type GetApplicationsParams = {
   status?: ApplicationStatus;
   category_id?: number;
@@ -31,20 +34,19 @@ async function request<T>(
   init?: RequestInit,
   upload?: boolean,
 ): Promise<T> {
-  //check for jwt:
-  let token_header = {};
+  const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
+  const tokenType = localStorage.getItem(TOKEN_TYPE_KEY);
 
-  if (localStorage.getItem("jwt-token")) {
-    token_header = {
-      Authorization: `${localStorage.getItem("token-type")} ${localStorage.getItem("jwt-token")}`,
-    };
-  }
+  const tokenHeader: HeadersInit =
+    accessToken && tokenType
+      ? { Authorization: `${tokenType} ${accessToken}` }
+      : {};
 
-  let headers: HeadersInit = {
+  const headers: HeadersInit = {
     ...(init?.body !== undefined && !upload
       ? { "Content-Type": "application/json" }
       : {}),
-    ...token_header,
+    ...tokenHeader,
     ...init?.headers,
   };
 
@@ -54,16 +56,18 @@ async function request<T>(
   });
 
   if (response.status === 401) {
-    localStorage.removeItem("jwt-token");
-    localStorage.removeItem("token-type");
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(TOKEN_TYPE_KEY);
 
-    window.location.href = "/auth";
+    throw new ApiError("Unauthorized", 401);
   }
 
   if (!response.ok) {
     let message = `Request failed (${response.status})`;
+
     try {
       const body = (await response.json()) as { detail?: string | unknown };
+
       if (typeof body.detail === "string") {
         message = body.detail;
       } else if (body.detail !== undefined) {
@@ -72,6 +76,7 @@ async function request<T>(
     } catch {
       // response body was not JSON
     }
+
     throw new ApiError(message, response.status);
   }
 
@@ -85,6 +90,8 @@ async function request<T>(
 export async function health_check(): Promise<{ message: string }> {
   return request<{ message: string }>("/");
 }
+
+// --- Applications ---
 
 export async function get_applications(
   params?: GetApplicationsParams,
@@ -168,7 +175,7 @@ export async function upload_logo_image(file: File): Promise<string> {
   return jsonData.message;
 }
 
-// -- Users --
+// --- Users ---
 
 export async function register(user: UserCreate): Promise<User> {
   return request<User>("/register", {
@@ -186,7 +193,22 @@ export async function login(user: FormData): Promise<Token> {
     },
     true,
   );
-  localStorage.setItem("jwt-token", token.access_token);
-  localStorage.setItem("token-type", token.token_type);
+
+  localStorage.setItem(ACCESS_TOKEN_KEY, token.access_token);
+  localStorage.setItem(TOKEN_TYPE_KEY, token.token_type);
+
   return token;
+}
+
+export function logout() {
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(TOKEN_TYPE_KEY);
+
+  window.location.href = "/auth";
+}
+
+export async function get_user_data(): Promise<User> {
+  return request<User>("/user", {
+    method: "GET",
+  });
 }

@@ -1,16 +1,21 @@
 import { useState } from "react";
 import {
   AppBar,
+  Avatar,
   Box,
   Button,
   Container,
   IconButton,
+  Menu,
+  MenuItem,
   Paper,
 } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
+
+import PopupState, { bindTrigger, bindMenu } from "material-ui-popup-state";
 
 import {
   DragDropProvider,
@@ -19,7 +24,9 @@ import {
   useDroppable,
 } from "@dnd-kit/react";
 
-import type { Category } from "../types/Job";
+import type { Category, User } from "../types/Job";
+import { deepOrange } from "@mui/material/colors";
+import { logout } from "../services/application_service";
 
 const DELETE_CATEGORY_ID = "delete-category";
 
@@ -32,6 +39,7 @@ type NavbarProps = {
   onAddCategory: () => void;
   onReorderCategories: (categories: Category[]) => void;
   onDeleteCategory: (category: Category) => void;
+  user: User | null;
 };
 
 function moveItem<T>(items: T[], fromIndex: number, toIndex: number): T[] {
@@ -135,6 +143,7 @@ export default function Navbar({
   onAddCategory,
   onReorderCategories,
   onDeleteCategory,
+  user,
 }: NavbarProps) {
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
 
@@ -374,6 +383,33 @@ export default function Navbar({
             >
               {mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
             </IconButton>
+            <PopupState variant="popover" popupId="user_menu">
+              {(popupState) => {
+                return (
+                  <>
+                    {" "}
+                    <Avatar
+                      sx={{ bgcolor: deepOrange[500], cursor: "pointer" }}
+                      {...bindTrigger(popupState)}
+                    >
+                      {user?.name[0].toUpperCase()}
+                    </Avatar>
+                    <Menu {...bindMenu(popupState)}>
+                      <MenuItem onClick={popupState.close}>Profile</MenuItem>
+                      <MenuItem onClick={popupState.close}>My account</MenuItem>
+                      <MenuItem
+                        onClick={() => {
+                          popupState.close;
+                          logout();
+                        }}
+                      >
+                        Logout
+                      </MenuItem>
+                    </Menu>
+                  </>
+                );
+              }}
+            </PopupState>
           </Box>
         </Container>
       </AppBar>

@@ -5,6 +5,15 @@ import JobCard from "./JobCard";
 import type { Job } from "../types/Job";
 import type { SectionName } from "../utils/jobStatus";
 
+const EMPTY_SECTION_MESSAGES = {
+  "Wish List": "Save jobs you're interested in.",
+  Applied: "Track submitted applications.",
+  Interviewing: "Interview-stage jobs appear here.",
+  Offers: "Offers will show up here.",
+  Rejected: "Rejected jobs appear here.",
+  Archived: "Archived jobs are stored here.",
+} as const;
+
 export default function JobSection({
   title,
   icon,
@@ -122,15 +131,30 @@ export default function JobSection({
           flexDirection: "column",
         }}
       >
-        {jobs.map((job) => (
-          <JobCard
-            key={job.id ?? `${job.title}-${job.company}`}
-            job={job}
-            setSelectedJob={setSelectedJob}
-            setJobWindowOpen={setJobWindowOpen}
-            currentSection={title}
-          />
-        ))}
+        {jobs.length === 0 ? (
+          <Typography
+            variant="body1"
+            sx={{
+              opacity: 0.6,
+              textAlign: "center",
+              mt: 4,
+            }}
+          >
+            {EMPTY_SECTION_MESSAGES[title]}
+          </Typography>
+        ) : (
+          <>
+            {jobs.map((job) => (
+              <JobCard
+                key={job.id ?? `${job.title}-${job.company}`}
+                job={job}
+                setSelectedJob={setSelectedJob}
+                setJobWindowOpen={setJobWindowOpen}
+                currentSection={title}
+              />
+            ))}{" "}
+          </>
+        )}
       </Box>
     </Card>
   );

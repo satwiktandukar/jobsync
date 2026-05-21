@@ -3,14 +3,17 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import MuiCard from "@mui/material/Card";
 import Checkbox from "@mui/material/Checkbox";
-import Divider from "@mui/material/Divider";
 import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Link from "@mui/material/Link";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import { Alert, Snackbar } from "@mui/material";
 import { styled } from "@mui/material/styles";
+
+import { Link as RouterLink, useNavigate } from "react-router";
+
 import ForgotPassword from "./ForgotPassword";
 import { login } from "../services/application_service";
 
@@ -33,11 +36,28 @@ const Card = styled(MuiCard)(({ theme }) => ({
 }));
 
 export default function Login() {
-  const [usernameError, setusernameError] = React.useState(false);
-  const [usernameErrorMessage, setusernameErrorMessage] = React.useState("");
+  const navigate = useNavigate();
+
+  const [usernameError, setUsernameError] = React.useState(false);
+  const [usernameErrorMessage, setUsernameErrorMessage] = React.useState("");
+
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState("");
+
   const [open, setOpen] = React.useState(false);
+
+  const [snackbar, setSnackbar] = React.useState({
+    open: false,
+    message: "",
+    severity: "success" as "success" | "error" | "info" | "warning",
+  });
+
+  function handleSnackbarClose() {
+    setSnackbar((prev) => ({
+      ...prev,
+      open: false,
+    }));
+  }
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -47,33 +67,20 @@ export default function Login() {
     setOpen(false);
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    if (usernameError || passwordError) {
-      return;
-    }
-
-    event.preventDefault();
-
-    const data = new FormData(event.currentTarget);
-
-    const response = await login(data);
-    console.log(response);
-  };
-
   const validateInputs = () => {
     const username = document.getElementById("username") as HTMLInputElement;
     const password = document.getElementById("password") as HTMLInputElement;
 
     let isValid = true;
 
-    // if (!username.value || !/\S+@\S+\.\S+/.test(username.value)) {
-    //   setusernameError(true);
-    //   setusernameErrorMessage("Please enter a valid username address.");
-    //   isValid = false;
-    // } else {
-    //   setusernameError(false);
-    //   setusernameErrorMessage("");
-    // }
+    if (!username.value || username.value.trim().length < 3) {
+      setUsernameError(true);
+      setUsernameErrorMessage("Username is required.");
+      isValid = false;
+    } else {
+      setUsernameError(false);
+      setUsernameErrorMessage("");
+    }
 
     if (!password.value || password.value.length < 6) {
       setPasswordError(true);
@@ -87,92 +94,159 @@ export default function Login() {
     return isValid;
   };
 
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const isValid = validateInputs();
+
+    if (!isValid) return;
+
+    const data = new FormData(event.currentTarget);
+
+    try {
+      await login(data);
+
+      setSnackbar({
+        open: true,
+        message: "Login successful. Redirecting...",
+        severity: "success",
+      });
+
+      setTimeout(() => {
+        navigate("/");
+      }, 1000);
+    } catch {
+      setSnackbar({
+        open: true,
+        message: "Invalid username or password.",
+        severity: "error",
+      });
+    }
+  };
+
   return (
-    <Card variant="outlined">
-      <Typography
-        component="h1"
-        variant="h4"
-        sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}
-      >
-        Sign in
-      </Typography>
-      <Box
-        component="form"
-        onSubmit={handleSubmit}
-        noValidate
-        sx={{ display: "flex", flexDirection: "column", width: "100%", gap: 2 }}
-      >
-        <FormControl>
-          <FormLabel htmlFor="username">Username</FormLabel>
-          <TextField
-            error={usernameError}
-            helperText={usernameErrorMessage}
-            id="username"
-            type="username"
-            name="username"
-            placeholder="username"
-            autoComplete="username"
-            autoFocus
-            required
-            fullWidth
-            variant="outlined"
-            color={usernameError ? "error" : "primary"}
-          />
-        </FormControl>
-        <FormControl>
-          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-            <FormLabel htmlFor="password">Password</FormLabel>
-            <Link
-              component="button"
-              type="button"
-              onClick={handleClickOpen}
-              variant="body2"
-              sx={{ alignSelf: "baseline" }}
-            >
-              Forgot your password?
-            </Link>
-          </Box>
-          <TextField
-            error={passwordError}
-            helperText={passwordErrorMessage}
-            name="password"
-            placeholder="••••••"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            autoFocus
-            required
-            fullWidth
-            variant="outlined"
-            color={passwordError ? "error" : "primary"}
-          />
-        </FormControl>
-        <FormControlLabel
-          control={<Checkbox value="remember" color="primary" />}
-          label="Remember me"
-        />
-        <ForgotPassword open={open} handleClose={handleClose} />
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          onClick={validateInputs}
+    <>
+      <Card variant="outlined">
+        <Typography
+          component="h1"
+          variant="h4"
+          sx={{
+            width: "100%",
+            fontSize: "clamp(2rem, 10vw, 2.15rem)",
+          }}
         >
           Sign in
-        </Button>
-        <Typography sx={{ textAlign: "center" }}>
-          Don&apos;t have an account?{" "}
-          <span>
-            <Link
-              href="/auth/register"
-              variant="body2"
-              sx={{ alignSelf: "center" }}
-            >
-              Sign up
-            </Link>
-          </span>
         </Typography>
-      </Box>
-    </Card>
+
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          noValidate
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            gap: 2,
+          }}
+        >
+          <FormControl>
+            <FormLabel htmlFor="username">Username</FormLabel>
+
+            <TextField
+              error={usernameError}
+              helperText={usernameErrorMessage}
+              id="username"
+              type="text"
+              name="username"
+              placeholder="username"
+              autoComplete="username"
+              autoFocus
+              required
+              fullWidth
+              variant="outlined"
+              color={usernameError ? "error" : "primary"}
+            />
+          </FormControl>
+
+          <FormControl>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+              }}
+            >
+              <FormLabel htmlFor="password">Password</FormLabel>
+
+              <Link
+                component="button"
+                type="button"
+                onClick={handleClickOpen}
+                variant="body2"
+                sx={{ alignSelf: "baseline" }}
+              >
+                Forgot your password?
+              </Link>
+            </Box>
+
+            <TextField
+              error={passwordError}
+              helperText={passwordErrorMessage}
+              name="password"
+              placeholder="••••••"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              required
+              fullWidth
+              variant="outlined"
+              color={passwordError ? "error" : "primary"}
+            />
+          </FormControl>
+
+          <FormControlLabel
+            control={<Checkbox value="remember" color="primary" />}
+            label="Remember me"
+          />
+
+          <ForgotPassword open={open} handleClose={handleClose} />
+
+          <Button type="submit" fullWidth variant="contained">
+            Sign in
+          </Button>
+
+          <Typography sx={{ textAlign: "center" }}>
+            Don&apos;t have an account?{" "}
+            <span>
+              <Link
+                component={RouterLink}
+                to="/auth/register"
+                variant="body2"
+                sx={{ alignSelf: "center" }}
+              >
+                Sign up
+              </Link>
+            </span>
+          </Typography>
+        </Box>
+      </Card>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbar.severity}
+          variant="filled"
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </>
   );
 }
