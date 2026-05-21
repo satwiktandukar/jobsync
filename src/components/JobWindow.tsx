@@ -139,7 +139,10 @@ export default function JobWindow({
             display: "flex",
             alignItems: "center",
             flexDirection: "column",
-            color: "white",
+            color: "text.primary",
+            "& .Mui-disabled": {
+              WebkitTextFillColor: "#ffffff",
+            },
           }}
         >
           <Box sx={{ padding: "20px" }}>

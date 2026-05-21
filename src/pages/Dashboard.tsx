@@ -92,9 +92,14 @@ function App() {
           mode,
 
           background: {
-            default: mode === "dark" ? "#0f1115" : "#f4f7fb",
+            default: mode === "dark" ? "#0f1115" : "#edf1f5",
 
             paper: mode === "dark" ? "#1a1d24" : "#ffffff",
+          },
+
+          text: {
+            primary: mode === "dark" ? "#f3f4f6" : "#111827",
+            secondary: mode === "dark" ? "#9ca3af" : "#6b7280",
           },
 
           primary: {
@@ -312,7 +317,7 @@ function App() {
             className="App"
             sx={{
               minHeight: "100vh",
-
+              color: "text.primary",
               overflow: "visible",
 
               scrollbarWidth: "none",

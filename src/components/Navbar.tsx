@@ -96,6 +96,7 @@ function CategoryButton({
         fontWeight: 700,
         touchAction: "none",
         backdropFilter: "blur(12px)",
+        color: "text.primary",
       }}
     >
       {category.title}
@@ -268,6 +269,7 @@ export default function Navbar({
                 flexShrink: 0,
                 fontWeight: 700,
                 backdropFilter: "blur(12px)",
+                color: "text.primary",
               }}
             >
               All
@@ -340,6 +342,7 @@ export default function Navbar({
                 borderRadius: "999px",
                 fontWeight: 700,
                 backdropFilter: "blur(12px)",
+                color: "text.primary",
                 background:
                   theme.palette.mode === "dark"
                     ? "rgba(255,255,255,0.04)"
@@ -357,7 +360,7 @@ export default function Navbar({
             </Button>
 
             <IconButton
-              color="inherit"
+              color="text.primary"
               onClick={() => setMode(mode === "light" ? "dark" : "light")}
               aria-label={
                 mode === "light"
