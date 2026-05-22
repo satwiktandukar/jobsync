@@ -10,10 +10,12 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import ArchiveIcon from "@mui/icons-material/Archive";
 
 import {
+  Alert,
   Box,
   CircularProgress,
   Container,
   CssBaseline,
+  Snackbar,
   ThemeProvider,
   createTheme,
 } from "@mui/material";
@@ -78,12 +80,25 @@ function App() {
     "All",
   );
 
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success" as "success" | "error" | "info" | "warning",
+  });
+
   const [mode, setMode] = useState<"light" | "dark">(() =>
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-color-scheme: dark)").matches
       ? "dark"
       : "light",
   );
+
+  function handleSnackbarClose() {
+    setSnackbar((prev) => ({
+      ...prev,
+      open: false,
+    }));
+  }
 
   const theme = useMemo(
     () =>
@@ -189,6 +204,7 @@ function App() {
     if (selectedCategory === "All") {
       return jobs;
     }
+
     return jobs.filter((job) => job.category_id === selectedCategory);
   }, [jobs, selectedCategory]);
 
@@ -203,21 +219,35 @@ function App() {
     [filteredJobs],
   );
 
-  async function handleAddCategory() {
-    const category = prompt("Enter category name:");
-
+  async function handleAddCategory(category: string) {
     if (!category) return;
 
     const cleanedCategory = category.trim();
 
-    if (!cleanedCategory) return;
+    if (!cleanedCategory) {
+      setSnackbar({
+        open: true,
+        message: "Category name cannot be empty.",
+        severity: "warning",
+      });
+
+      return;
+    }
 
     const alreadyExists = categories.some(
       (existing) =>
         existing.title.toLowerCase() === cleanedCategory.toLowerCase(),
     );
 
-    if (alreadyExists) return;
+    if (alreadyExists) {
+      setSnackbar({
+        open: true,
+        message: "Category already exists.",
+        severity: "warning",
+      });
+
+      return;
+    }
 
     try {
       const createdCategory = await create_category(cleanedCategory);
@@ -225,8 +255,20 @@ function App() {
       setCategories((prev) => [...prev, createdCategory]);
 
       setSelectedCategory(createdCategory.id);
+
+      setSnackbar({
+        open: true,
+        message: "Category added successfully.",
+        severity: "success",
+      });
     } catch (error) {
       console.error(error);
+
+      setSnackbar({
+        open: true,
+        message: "Failed to add category.",
+        severity: "error",
+      });
     }
   }
 
@@ -241,8 +283,14 @@ function App() {
       await delete_category(category.id);
     } catch (error) {
       console.error(error);
+
       setSelectedCategory("All");
-      alert("Failed to delete category.");
+
+      setSnackbar({
+        open: true,
+        message: "Failed to delete category.",
+        severity: "error",
+      });
     }
   }
 
@@ -334,7 +382,14 @@ function App() {
               overflowX: "hidden",
               overflowY: "auto",
               boxSizing: "border-box",
+              backgroundImage:
+                "radial-gradient(ellipse at 50% 50%, hsla(265, 79%, 62%, 0.24), hsl(215, 45%, 96%))",
+              backgroundRepeat: "no-repeat",
 
+              ...theme.applyStyles("dark", {
+                backgroundImage:
+                  "radial-gradient(ellipse at 50% 50%, hsla(265, 65.90%, 24.10%, 0.32), hsl(222, 42%, 7%))",
+              }),
               scrollbarWidth: "none",
 
               "&::-webkit-scrollbar": {
@@ -470,6 +525,24 @@ function App() {
           </Box>
         </Container>
       </DragDropProvider>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbar.severity}
+          variant="filled"
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </ThemeProvider>
   );
 }

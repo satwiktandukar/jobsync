@@ -14,7 +14,6 @@ import { styled } from "@mui/material/styles";
 
 import { Link as RouterLink, useNavigate } from "react-router";
 
-import ForgotPassword from "./ForgotPassword";
 import { login } from "../services/application_service";
 
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -24,14 +23,21 @@ const Card = styled(MuiCard)(({ theme }) => ({
   width: "100%",
   padding: theme.spacing(4),
   gap: theme.spacing(2),
-  boxShadow:
-    "hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px",
+  borderRadius: "24px",
+
+  backgroundColor: "rgba(255, 255, 255, 0.68)",
+  backdropFilter: "blur(18px)",
+  border: "1px solid rgba(255, 255, 255, 0.5)",
+  boxShadow: "0 24px 80px rgba(36, 28, 95, 0.24)",
+
   [theme.breakpoints.up("sm")]: {
     width: "450px",
   },
+
   ...theme.applyStyles("dark", {
-    boxShadow:
-      "hsla(220, 30%, 5%, 0.5) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.08) 0px 15px 35px -5px",
+    backgroundColor: "rgba(17, 15, 35, 0.78)",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+    boxShadow: "0 24px 80px rgba(0, 0, 0, 0.35)",
   }),
 }));
 
@@ -43,8 +49,6 @@ export default function Login() {
 
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState("");
-
-  const [open, setOpen] = React.useState(false);
 
   const [snackbar, setSnackbar] = React.useState({
     open: false,
@@ -59,14 +63,6 @@ export default function Login() {
     }));
   }
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
   const validateInputs = () => {
     const username = document.getElementById("username") as HTMLInputElement;
     const password = document.getElementById("password") as HTMLInputElement;
@@ -75,7 +71,7 @@ export default function Login() {
 
     if (!username.value || username.value.trim().length < 3) {
       setUsernameError(true);
-      setUsernameErrorMessage("Username is required.");
+      setUsernameErrorMessage("Username must be at least 3 characters long.");
       isValid = false;
     } else {
       setUsernameError(false);
@@ -133,6 +129,8 @@ export default function Login() {
           sx={{
             width: "100%",
             fontSize: "clamp(2rem, 10vw, 2.15rem)",
+            fontWeight: 500,
+            color: "text.primary",
           }}
         >
           Sign in
@@ -169,24 +167,7 @@ export default function Login() {
           </FormControl>
 
           <FormControl>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
-              <FormLabel htmlFor="password">Password</FormLabel>
-
-              <Link
-                component="button"
-                type="button"
-                onClick={handleClickOpen}
-                variant="body2"
-                sx={{ alignSelf: "baseline" }}
-              >
-                Forgot your password?
-              </Link>
-            </Box>
+            <FormLabel htmlFor="password">Password</FormLabel>
 
             <TextField
               error={passwordError}
@@ -204,28 +185,68 @@ export default function Login() {
           </FormControl>
 
           <FormControlLabel
-            control={<Checkbox value="remember" color="primary" />}
+            control={
+              <Checkbox
+                value="remember"
+                sx={{
+                  color: "hsl(265, 79%, 52%)",
+
+                  "&.Mui-checked": {
+                    color: "hsl(265, 79%, 52%)",
+                  },
+                }}
+              />
+            }
             label="Remember me"
           />
 
-          <ForgotPassword open={open} handleClose={handleClose} />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{
+              mt: 1,
+              py: 1.2,
+              borderRadius: "10px",
+              textTransform: "none",
+              fontWeight: 700,
+              fontSize: "1rem",
 
-          <Button type="submit" fullWidth variant="contained">
+              backgroundColor: "hsl(265, 79%, 52%)",
+              boxShadow: "0 10px 28px rgba(126, 34, 206, 0.28)",
+
+              "&:hover": {
+                backgroundColor: "hsl(265, 75%, 45%)",
+                boxShadow: "0 12px 32px rgba(126, 34, 206, 0.34)",
+              },
+            }}
+          >
             Sign in
           </Button>
 
-          <Typography sx={{ textAlign: "center" }}>
+          <Typography
+            sx={{
+              textAlign: "center",
+              color: "text.primary",
+            }}
+          >
             Don&apos;t have an account?{" "}
-            <span>
-              <Link
-                component={RouterLink}
-                to="/auth/register"
-                variant="body2"
-                sx={{ alignSelf: "center" }}
-              >
-                Sign up
-              </Link>
-            </span>
+            <Link
+              component={RouterLink}
+              to="/auth/register"
+              variant="body2"
+              sx={{
+                color: "hsl(265, 79%, 45%)",
+                fontWeight: 500,
+                textDecoration: "none",
+
+                "&:hover": {
+                  textDecoration: "underline",
+                },
+              }}
+            >
+              Sign up
+            </Link>
           </Typography>
         </Box>
       </Card>

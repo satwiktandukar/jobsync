@@ -5,14 +5,16 @@ import {
   Container,
   MenuItem,
   Modal,
+  Paper,
   Snackbar,
+  Stack,
   TextField,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+
 import type { Category, Job, JobUpdate } from "../types/Job";
 import { update_application } from "../services/application_service";
-import TextFieldJob from "./TextfieldJob";
 
 type JobWindowProps = {
   open: boolean;
@@ -33,6 +35,12 @@ function jobToForm(job: Job) {
     logo: job.logo ?? "",
   };
 }
+
+const textFieldSx = {
+  "& .MuiOutlinedInput-root": {
+    borderRadius: "12px",
+  },
+};
 
 export default function JobWindow({
   open,
@@ -69,9 +77,9 @@ export default function JobWindow({
   }
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    const { name, value } = e.target;
+    const { name, value } = event.target;
 
     setData((prev) => ({
       ...prev,
@@ -79,8 +87,8 @@ export default function JobWindow({
     }));
   };
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
 
     if (!isEditing) {
       setIsEditing(true);
@@ -101,11 +109,12 @@ export default function JobWindow({
 
     try {
       const updated = await update_application(job.id, patch);
+
       onJobUpdated(updated);
 
       setSnackbar({
         open: true,
-        message: "Job saved successfully",
+        message: "Job saved successfully.",
         severity: "success",
       });
 
@@ -115,7 +124,7 @@ export default function JobWindow({
 
       setSnackbar({
         open: true,
-        message: "Failed to save job",
+        message: "Failed to save job.",
         severity: "error",
       });
     }
@@ -129,7 +138,8 @@ export default function JobWindow({
         slotProps={{
           backdrop: {
             sx: {
-              backgroundColor: "rgba(0, 0, 0, 0.83)",
+              backgroundColor: "rgba(4, 6, 18, 0.72)",
+              backdropFilter: "blur(8px)",
             },
           },
         }}
@@ -137,16 +147,14 @@ export default function JobWindow({
         <Container
           maxWidth="sm"
           sx={{
-            height: "100dvh",
-            overflowY: "auto",
-            overflowX: "hidden",
+            minHeight: "80dvh",
+            maxHeight: "100dvh",
 
             display: "flex",
             alignItems: { xs: "flex-start", sm: "center" },
             flexDirection: "column",
-
-            color: "text.primary",
-
+            overflowY: "auto",
+            overflowX: "hidden",
             boxSizing: "border-box",
 
             scrollbarWidth: "none",
@@ -154,103 +162,181 @@ export default function JobWindow({
             "&::-webkit-scrollbar": {
               display: "none",
             },
-
-            "& .Mui-disabled": {
-              WebkitTextFillColor: "#ffffff",
-            },
           }}
         >
-          <Box sx={{ padding: "20px" }}>
-            <Typography variant="h4" id="modal-modal-title">
-              Job Details
-            </Typography>
-          </Box>
+          <Paper
+            elevation={0}
+            sx={(theme) => ({
+              width: "100%",
+              p: { xs: 2.5, sm: 4 },
+              borderRadius: "24px",
 
-          <form onSubmit={handleSubmit}>
-            <TextFieldJob
-              name="title"
-              label="Title"
-              value={data.title}
-              required
-              handleChange={handleChange}
-              isEditing={isEditing}
-            />
+              backgroundColor: "rgba(255, 255, 255, 0.72)",
+              backdropFilter: "blur(18px)",
+              border: "1px solid rgba(255, 255, 255, 0.5)",
+              boxShadow: "0 24px 80px rgba(36, 28, 95, 0.24)",
 
-            <TextFieldJob
-              name="company"
-              label="Company"
-              value={data.company}
-              required
-              handleChange={handleChange}
-              isEditing={isEditing}
-            />
+              ...theme.applyStyles("dark", {
+                backgroundColor: "rgba(17, 15, 35, 0.86)",
+                border: "1px solid rgba(255, 255, 255, 0.08)",
+                boxShadow: "0 24px 80px rgba(0, 0, 0, 0.42)",
+              }),
+            })}
+          >
+            <Stack spacing={3}>
+              <Box>
+                <Typography
+                  component="h2"
+                  variant="h4"
+                  sx={{
+                    fontWeight: 700,
+                    letterSpacing: "-0.03em",
+                    color: "text.primary",
+                  }}
+                >
+                  Job details
+                </Typography>
 
-            <TextFieldJob
-              name="location"
-              label="Location"
-              value={data.location}
-              required
-              handleChange={handleChange}
-              isEditing={isEditing}
-            />
+                <Typography
+                  sx={{
+                    mt: 0.75,
+                    color: "text.secondary",
+                    fontSize: "0.95rem",
+                  }}
+                >
+                  {isEditing
+                    ? "Update the details for this job application."
+                    : "View the saved details for this job application."}
+                </Typography>
+              </Box>
 
-            <TextFieldJob
-              name="salary"
-              label="Salary"
-              value={data.salary}
-              type="number"
-              handleChange={handleChange}
-              isEditing={isEditing}
-            />
+              <Box component="form" onSubmit={handleSubmit}>
+                <Stack spacing={1.2}>
+                  <TextField
+                    name="title"
+                    label="Job title"
+                    value={data.title}
+                    onChange={handleChange}
+                    sx={textFieldSx}
+                    fullWidth
+                    required
+                    disabled={!isEditing}
+                  />
 
-            <TextFieldJob
-              name="description"
-              label="Description"
-              value={data.description}
-              multiline
-              rows={4}
-              handleChange={handleChange}
-              isEditing={isEditing}
-            />
+                  <TextField
+                    name="company"
+                    label="Company"
+                    value={data.company}
+                    onChange={handleChange}
+                    sx={textFieldSx}
+                    fullWidth
+                    required
+                    disabled={!isEditing}
+                  />
 
-            <TextField
-              select
-              fullWidth
-              name="category_id"
-              label="Category"
-              value={data.category_id}
-              onChange={handleChange}
-              disabled={!isEditing}
-            >
-              <MenuItem value="">No category</MenuItem>
+                  <TextField
+                    name="location"
+                    label="Location"
+                    value={data.location}
+                    onChange={handleChange}
+                    sx={textFieldSx}
+                    fullWidth
+                    required
+                    disabled={!isEditing}
+                  />
 
-              {categories.map((category) => (
-                <MenuItem key={category.id} value={String(category.id)}>
-                  {category.title}
-                </MenuItem>
-              ))}
-            </TextField>
+                  <TextField
+                    name="salary"
+                    label="Salary"
+                    type="number"
+                    value={data.salary}
+                    onChange={handleChange}
+                    sx={textFieldSx}
+                    fullWidth
+                    disabled={!isEditing}
+                  />
 
-            <TextFieldJob
-              name="logo"
-              label="Logo URL"
-              value={data.logo}
-              handleChange={handleChange}
-              isEditing={isEditing}
-            />
+                  <TextField
+                    name="description"
+                    label="Description"
+                    value={data.description}
+                    onChange={handleChange}
+                    sx={textFieldSx}
+                    fullWidth
+                    multiline
+                    rows={2}
+                    disabled={!isEditing}
+                  />
 
-            <Box sx={{ padding: "20px" }}>
-              <Button
-                variant="contained"
-                type="submit"
-                color={isEditing ? "success" : "info"}
-                sx={{ borderRadius: "20px" }}
-                fullWidth
-              >
-                {isEditing ? "Save" : "Edit"}
-              </Button>
-            </Box>
-          </form>
+                  <TextField
+                    select
+                    fullWidth
+                    name="category_id"
+                    label="Category"
+                    value={data.category_id}
+                    onChange={handleChange}
+                    sx={textFieldSx}
+                    disabled={!isEditing}
+                  >
+                    <MenuItem value="">No category</MenuItem>
+
+                    {categories.map((category) => (
+                      <MenuItem key={category.id} value={String(category.id)}>
+                        {category.title}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+
+                  <Button
+                    variant="contained"
+                    type="submit"
+                    fullWidth
+                    sx={{
+                      mt: 1,
+                      py: 1.2,
+                      borderRadius: "10px",
+                      textTransform: "none",
+                      fontWeight: 700,
+                      fontSize: "1rem",
+
+                      backgroundColor: isEditing
+                        ? "success.main"
+                        : "hsl(265, 79%, 52%)",
+                      boxShadow: isEditing
+                        ? "0 10px 28px rgba(46, 125, 50, 0.28)"
+                        : "0 10px 28px rgba(126, 34, 206, 0.28)",
+
+                      "&:hover": {
+                        backgroundColor: isEditing
+                          ? "success.dark"
+                          : "hsl(265, 75%, 45%)",
+                        boxShadow: isEditing
+                          ? "0 12px 32px rgba(46, 125, 50, 0.34)"
+                          : "0 12px 32px rgba(126, 34, 206, 0.34)",
+                      },
+                    }}
+                  >
+                    {isEditing ? "Save changes" : "Edit job"}
+                  </Button>
+
+                  <Button
+                    type="button"
+                    fullWidth
+                    variant="text"
+                    onClick={handleClose}
+                    sx={{
+                      borderRadius: "10px",
+                      textTransform: "none",
+                      fontWeight: 600,
+                      color: "text.secondary",
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </Stack>
+              </Box>
+            </Stack>
+          </Paper>
         </Container>
       </Modal>
 

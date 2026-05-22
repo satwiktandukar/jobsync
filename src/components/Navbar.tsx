@@ -5,10 +5,15 @@ import {
   Box,
   Button,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
   Menu,
   MenuItem,
   Paper,
+  TextField,
 } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
@@ -36,7 +41,7 @@ type NavbarProps = {
   categories: Category[];
   selectedCategory: number | "All";
   setSelectedCategory: (category: number | "All") => void;
-  onAddCategory: () => void;
+  onAddCategory: (title: string) => void;
   onReorderCategories: (categories: Category[]) => void;
   onDeleteCategory: (category: Category) => void;
   user: User | null;
@@ -81,7 +86,7 @@ function CategoryButton({
         droppableRef(node);
       }}
       color="inherit"
-      variant={selected ? "contained" : "text"}
+      variant={selected ? "outlined" : "text"}
       onClick={() => setSelectedCategory(category.id)}
       sx={{
         minWidth: { xs: "95px", sm: "130px", md: "180px" },
@@ -149,6 +154,26 @@ export default function Navbar({
   user,
 }: NavbarProps) {
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [newCategoryTitle, setNewCategoryTitle] = useState("");
+
+  function openAddDialog() {
+    setIsAddDialogOpen(true);
+  }
+
+  function closeAddDialog() {
+    setNewCategoryTitle("");
+    setIsAddDialogOpen(false);
+  }
+
+  function handleAddCategorySubmit() {
+    const title = newCategoryTitle.trim();
+
+    if (!title) return;
+
+    onAddCategory(title);
+    closeAddDialog();
+  }
 
   function handleDragStart(event: any) {
     const category = event.operation.source?.data?.category as
@@ -205,235 +230,277 @@ export default function Navbar({
   const allSelected = selectedCategory === "All";
 
   return (
-    <DragDropProvider onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <AppBar
-        elevation={0}
-        sx={(theme) => ({
-          height: "72px",
-          display: "flex",
-          justifyContent: "center",
-          background:
-            theme.palette.mode === "dark"
-              ? `
-              linear-gradient(
-                135deg,
-                rgba(255,255,255,0.08),
-                rgba(255,255,255,0.03)
-              )
-            `
-              : `
-              linear-gradient(
-                135deg,
-                rgba(255,255,255,0.75),
-                rgba(255,255,255,0.45)
-              )
-            `,
-          backdropFilter: "blur(18px)",
-          WebkitBackdropFilter: "blur(18px)",
-          overflow: "visible",
-        })}
-      >
-        <Container
-          maxWidth={false}
-          sx={{
-            height: "100%",
-            width: "100%",
+    <>
+      <DragDropProvider onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <AppBar
+          elevation={0}
+          sx={(theme) => ({
+            height: "72px",
             display: "flex",
-            alignItems: "center",
-            gap: { xs: 0.75, md: 2 },
-            px: { xs: 1, md: 3 },
-          }}
+            justifyContent: "center",
+            background:
+              theme.palette.mode === "dark"
+                ? `
+                linear-gradient(
+                  135deg,
+                  rgba(255,255,255,0.08),
+                  rgba(255,255,255,0.03)
+                )
+              `
+                : `
+                linear-gradient(
+                  135deg,
+                  rgba(255,255,255,0.75),
+                  rgba(255,255,255,0.45)
+                )
+              `,
+            backdropFilter: "blur(18px)",
+            WebkitBackdropFilter: "blur(18px)",
+            overflow: "visible",
+          })}
         >
-          <Box
+          <Container
+            maxWidth={false}
             sx={{
               height: "100%",
-              flex: 1,
-              minWidth: 0,
+              width: "100%",
               display: "flex",
               alignItems: "center",
-              gap: { xs: 0.75, md: 1.2 },
-              overflowX: "auto",
-              overflowY: "hidden",
-              scrollbarWidth: "none",
-              "&::-webkit-scrollbar": {
-                display: "none",
-              },
+              gap: { xs: 0.75, md: 2 },
+              px: { xs: 1, md: 3 },
             }}
           >
-            <Button
-              color="inherit"
-              variant={allSelected ? "contained" : "text"}
-              onClick={() => setSelectedCategory("All")}
-              sx={{
-                minWidth: { xs: "70px", md: "120px" },
-                height: { xs: "38px", md: "48px" },
-                fontSize: { xs: "0.72rem", md: "0.875rem" },
-                px: { xs: 1, md: 2 },
-                borderRadius: "999px",
-                flexShrink: 0,
-                fontWeight: 700,
-                backdropFilter: "blur(12px)",
-                color: "text.primary",
-              }}
-            >
-              All
-            </Button>
-
             <Box
               sx={{
+                height: "100%",
+                flex: 1,
+                minWidth: 0,
                 display: "flex",
                 alignItems: "center",
                 gap: { xs: 0.75, md: 1.2 },
+                overflowX: "auto",
+                overflowY: "hidden",
+                scrollbarWidth: "none",
+                "&::-webkit-scrollbar": {
+                  display: "none",
+                },
+              }}
+            >
+              <Button
+                color="inherit"
+                variant={allSelected ? "outlined" : "text"}
+                onClick={() => setSelectedCategory("All")}
+                sx={{
+                  minWidth: { xs: "70px", md: "120px" },
+                  height: { xs: "38px", md: "48px" },
+                  fontSize: { xs: "0.72rem", md: "0.875rem" },
+                  px: { xs: 1, md: 2 },
+                  borderRadius: "999px",
+                  flexShrink: 0,
+                  fontWeight: 700,
+                  backdropFilter: "blur(12px)",
+                  color: "text.primary",
+                }}
+              >
+                All
+              </Button>
+
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: { xs: 0.75, md: 1.2 },
+                  height: "100%",
+                  flexShrink: 0,
+                }}
+              >
+                {categories.map((category) => (
+                  <CategoryButton
+                    key={category.id}
+                    category={category}
+                    selectedCategory={selectedCategory}
+                    setSelectedCategory={setSelectedCategory}
+                  />
+                ))}
+              </Box>
+
+              <DragOverlay>
+                {activeCategory ? (
+                  <Button
+                    color="inherit"
+                    variant="contained"
+                    sx={{
+                      minWidth: { xs: "95px", sm: "130px", md: "180px" },
+                      maxWidth: { xs: "120px", sm: "160px", md: "220px" },
+                      height: { xs: "38px", md: "48px" },
+                      fontSize: { xs: "0.72rem", md: "0.875rem" },
+                      px: { xs: 1, md: 2 },
+                      borderRadius: "999px",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      boxShadow: "0 12px 30px rgba(0,0,0,0.35)",
+                      cursor: "grabbing",
+                      backdropFilter: "blur(18px)",
+                      background: "rgba(124,92,255,0.32)",
+                      border: "1px solid rgba(255,255,255,0.18)",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    {activeCategory.title}
+                  </Button>
+                ) : null}
+              </DragOverlay>
+            </Box>
+
+            <Box
+              sx={{
                 height: "100%",
+                width: { xs: "auto", md: "300px" },
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-end",
+                gap: { xs: 0.5, md: 1.2 },
                 flexShrink: 0,
               }}
             >
-              {categories.map((category) => (
-                <CategoryButton
-                  key={category.id}
-                  category={category}
-                  selectedCategory={selectedCategory}
-                  setSelectedCategory={setSelectedCategory}
-                />
-              ))}
-            </Box>
-
-            <DragOverlay>
-              {activeCategory ? (
-                <Button
-                  color="inherit"
-                  variant="contained"
+              <Button
+                color="inherit"
+                onClick={openAddDialog}
+                sx={(theme) => ({
+                  minWidth: { xs: "38px", md: "170px" },
+                  width: { xs: "38px", md: "auto" },
+                  height: { xs: "38px", md: "48px" },
+                  px: { xs: 0, md: 2 },
+                  borderRadius: "999px",
+                  fontWeight: 700,
+                  backdropFilter: "blur(12px)",
+                  color: "text.primary",
+                  background:
+                    theme.palette.mode === "dark"
+                      ? "rgba(255,255,255,0.04)"
+                      : "rgba(255,255,255,0.45)",
+                  border:
+                    theme.palette.mode === "dark"
+                      ? "1px solid rgba(255,255,255,0.08)"
+                      : "1px solid rgba(255,255,255,0.65)",
+                  "&:hover": {
+                    transform: "translateY(-2px)",
+                  },
+                })}
+              >
+                <AddIcon
                   sx={{
-                    minWidth: { xs: "95px", sm: "130px", md: "180px" },
-                    maxWidth: { xs: "120px", sm: "160px", md: "220px" },
-                    height: { xs: "38px", md: "48px" },
-                    fontSize: { xs: "0.72rem", md: "0.875rem" },
-                    px: { xs: 1, md: 2 },
-                    borderRadius: "999px",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    boxShadow: "0 12px 30px rgba(0,0,0,0.35)",
-                    cursor: "grabbing",
-                    backdropFilter: "blur(18px)",
-                    background: "rgba(124,92,255,0.32)",
-                    border: "1px solid rgba(255,255,255,0.18)",
-                    pointerEvents: "none",
+                    fontSize: { xs: 20, md: 22 },
+                    flexShrink: 0,
                   }}
-                >
-                  {activeCategory.title}
-                </Button>
-              ) : null}
-            </DragOverlay>
-          </Box>
+                />
 
-          <Box
-            sx={{
-              height: "100%",
-              width: { xs: "auto", md: "300px" },
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-end",
-              gap: { xs: 0.5, md: 1.2 },
-              flexShrink: 0,
-            }}
-          >
-            <Button
-              color="inherit"
-              onClick={onAddCategory}
-              sx={(theme) => ({
-                minWidth: { xs: "38px", md: "170px" },
-                width: { xs: "38px", md: "auto" },
-                height: { xs: "38px", md: "48px" },
-                px: { xs: 0, md: 2 },
-                borderRadius: "999px",
-                fontWeight: 700,
-                backdropFilter: "blur(12px)",
-                color: "text.primary",
-                background:
-                  theme.palette.mode === "dark"
-                    ? "rgba(255,255,255,0.04)"
-                    : "rgba(255,255,255,0.45)",
-                border:
-                  theme.palette.mode === "dark"
-                    ? "1px solid rgba(255,255,255,0.08)"
-                    : "1px solid rgba(255,255,255,0.65)",
-                "&:hover": {
-                  transform: "translateY(-2px)",
-                },
-              })}
-            >
-              <AddIcon
-                sx={{
-                  fontSize: { xs: 20, md: 22 },
-                  flexShrink: 0,
-                }}
-              />
+                <Box sx={{ display: { xs: "none", md: "block" }, ml: 1 }}>
+                  Add Category
+                </Box>
+              </Button>
 
-              <Box sx={{ display: { xs: "none", md: "block" }, ml: 1 }}>
-                Add Category
-              </Box>
-            </Button>
+              <IconButton
+                onClick={() => setMode(mode === "light" ? "dark" : "light")}
+                aria-label={
+                  mode === "light"
+                    ? "Switch to dark mode"
+                    : "Switch to light mode"
+                }
+                sx={(theme) => ({
+                  width: { xs: 38, md: 48 },
+                  height: { xs: 38, md: 48 },
+                  color: "text.primary",
+                  backdropFilter: "blur(12px)",
+                  background:
+                    theme.palette.mode === "dark"
+                      ? "rgba(255,255,255,0.04)"
+                      : "rgba(255,255,255,0.45)",
+                })}
+              >
+                {mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
+              </IconButton>
 
-            <IconButton
-              onClick={() => setMode(mode === "light" ? "dark" : "light")}
-              aria-label={
-                mode === "light"
-                  ? "Switch to dark mode"
-                  : "Switch to light mode"
-              }
-              sx={(theme) => ({
-                width: { xs: 38, md: 48 },
-                height: { xs: 38, md: 48 },
-                color: "text.primary",
-                backdropFilter: "blur(12px)",
-                background:
-                  theme.palette.mode === "dark"
-                    ? "rgba(255,255,255,0.04)"
-                    : "rgba(255,255,255,0.45)",
-              })}
-            >
-              {mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
-            </IconButton>
-
-            <PopupState variant="popover" popupId="user_menu">
-              {(popupState) => {
-                return (
-                  <>
-                    <Avatar
-                      sx={{
-                        bgcolor: deepOrange[500],
-                        cursor: "pointer",
-                        width: { xs: 38, md: 40 },
-                        height: { xs: 38, md: 40 },
-                        fontSize: { xs: "0.9rem", md: "1rem" },
-                      }}
-                      {...bindTrigger(popupState)}
-                    >
-                      {user?.name?.[0]?.toUpperCase()}
-                    </Avatar>
-
-                    <Menu {...bindMenu(popupState)} disableScrollLock>
-                      <MenuItem onClick={popupState.close}>Profile</MenuItem>
-                      <MenuItem onClick={popupState.close}>My account</MenuItem>
-                      <MenuItem
-                        onClick={() => {
-                          popupState.close();
-                          logout();
+              <PopupState variant="popover" popupId="user_menu">
+                {(popupState) => {
+                  return (
+                    <>
+                      <Avatar
+                        sx={{
+                          bgcolor: deepOrange[500],
+                          cursor: "pointer",
+                          width: { xs: 38, md: 40 },
+                          height: { xs: 38, md: 40 },
+                          fontSize: { xs: "0.9rem", md: "1rem" },
                         }}
+                        {...bindTrigger(popupState)}
                       >
-                        Logout
-                      </MenuItem>
-                    </Menu>
-                  </>
-                );
-              }}
-            </PopupState>
-          </Box>
-        </Container>
-      </AppBar>
+                        {user?.name?.[0]?.toUpperCase()}
+                      </Avatar>
 
-      {activeCategory && <DeleteCategoryDropZone />}
-    </DragDropProvider>
+                      <Menu {...bindMenu(popupState)} disableScrollLock>
+                        <MenuItem onClick={popupState.close}>Profile</MenuItem>
+                        <MenuItem onClick={popupState.close}>
+                          My account
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            popupState.close();
+                            logout();
+                          }}
+                        >
+                          Logout
+                        </MenuItem>
+                      </Menu>
+                    </>
+                  );
+                }}
+              </PopupState>
+            </Box>
+          </Container>
+        </AppBar>
+
+        {activeCategory && <DeleteCategoryDropZone />}
+      </DragDropProvider>
+
+      <Dialog
+        open={isAddDialogOpen}
+        onClose={closeAddDialog}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle>Add category</DialogTitle>
+
+        <DialogContent>
+          <TextField
+            autoFocus
+            fullWidth
+            label="Category name"
+            value={newCategoryTitle}
+            onChange={(event) => setNewCategoryTitle(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                handleAddCategorySubmit();
+              }
+            }}
+            sx={{ mt: 1 }}
+          />
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={closeAddDialog}>Cancel</Button>
+
+          <Button
+            variant="contained"
+            onClick={handleAddCategorySubmit}
+            disabled={!newCategoryTitle.trim()}
+          >
+            Add
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }
