@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+sqlmodel
+sqlalchemy
+python-multipart
+pyjwt
+pwdlib
+python-dotenv
+pillow
+email-validator
