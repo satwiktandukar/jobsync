@@ -2,10 +2,8 @@ import * as React from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import MuiCard from "@mui/material/Card";
-import Divider from "@mui/material/Divider";
 import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import Link from "@mui/material/Link";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
@@ -13,8 +11,8 @@ import { styled } from "@mui/material/styles";
 
 import type { UserCreate } from "../types/Job";
 import { register } from "../services/application_service";
-import { Alert, Snackbar, SnackbarContent } from "@mui/material";
-import { Navigate, useNavigate } from "react-router";
+import { Alert, Snackbar } from "@mui/material";
+import { useNavigate } from "react-router";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",

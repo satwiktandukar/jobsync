@@ -3,7 +3,7 @@ import LoginContent from "../components/LoginContent";
 import { Outlet } from "react-router";
 import { Box } from "@mui/material";
 
-export default function AuthPage(props: { disableCustomTheme?: boolean }) {
+export default function AuthPage() {
   return (
     <>
       <Stack

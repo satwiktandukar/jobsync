@@ -360,7 +360,6 @@ export default function Navbar({
             </Button>
 
             <IconButton
-              color="text.primary"
               onClick={() => setMode(mode === "light" ? "dark" : "light")}
               aria-label={
                 mode === "light"
@@ -370,18 +369,12 @@ export default function Navbar({
               sx={(theme) => ({
                 width: 48,
                 height: 48,
+                color: "text.primary",
                 backdropFilter: "blur(12px)",
                 background:
                   theme.palette.mode === "dark"
                     ? "rgba(255,255,255,0.04)"
                     : "rgba(255,255,255,0.45)",
-                border:
-                  theme.palette.mode === "dark"
-                    ? "1px solid rgba(255,255,255,0.08)"
-                    : "1px solid rgba(255,255,255,0.65)",
-                "&:hover": {
-                  transform: "translateY(-2px)",
-                },
               })}
             >
               {mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
@@ -402,7 +395,7 @@ export default function Navbar({
                       <MenuItem onClick={popupState.close}>My account</MenuItem>
                       <MenuItem
                         onClick={() => {
-                          popupState.close;
+                          popupState.close();
                           logout();
                         }}
                       >
