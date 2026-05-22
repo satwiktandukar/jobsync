@@ -135,11 +135,26 @@ export default function JobWindow({
         }}
       >
         <Container
+          maxWidth="sm"
           sx={{
+            height: "100dvh",
+            overflowY: "auto",
+            overflowX: "hidden",
+
             display: "flex",
-            alignItems: "center",
+            alignItems: { xs: "flex-start", sm: "center" },
             flexDirection: "column",
+
             color: "text.primary",
+
+            boxSizing: "border-box",
+
+            scrollbarWidth: "none",
+
+            "&::-webkit-scrollbar": {
+              display: "none",
+            },
+
             "& .Mui-disabled": {
               WebkitTextFillColor: "#ffffff",
             },

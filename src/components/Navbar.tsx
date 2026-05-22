@@ -84,9 +84,11 @@ function CategoryButton({
       variant={selected ? "contained" : "text"}
       onClick={() => setSelectedCategory(category.id)}
       sx={{
-        minWidth: "180px",
-        maxWidth: "220px",
-        height: "48px",
+        minWidth: { xs: "95px", sm: "130px", md: "180px" },
+        maxWidth: { xs: "120px", sm: "160px", md: "220px" },
+        height: { xs: "38px", md: "48px" },
+        fontSize: { xs: "0.72rem", md: "0.875rem" },
+        px: { xs: 1, md: 2 },
         borderRadius: "999px",
         flexShrink: 0,
         whiteSpace: "nowrap",
@@ -99,7 +101,7 @@ function CategoryButton({
         color: "text.primary",
       }}
     >
-      {category.title}
+      {category.title.toUpperCase()}
     </Button>
   );
 }
@@ -238,8 +240,8 @@ export default function Navbar({
             width: "100%",
             display: "flex",
             alignItems: "center",
-            gap: 2,
-            px: 3,
+            gap: { xs: 0.75, md: 2 },
+            px: { xs: 1, md: 3 },
           }}
         >
           <Box
@@ -249,7 +251,7 @@ export default function Navbar({
               minWidth: 0,
               display: "flex",
               alignItems: "center",
-              gap: 1.2,
+              gap: { xs: 0.75, md: 1.2 },
               overflowX: "auto",
               overflowY: "hidden",
               scrollbarWidth: "none",
@@ -263,8 +265,10 @@ export default function Navbar({
               variant={allSelected ? "contained" : "text"}
               onClick={() => setSelectedCategory("All")}
               sx={{
-                minWidth: "120px",
-                height: "48px",
+                minWidth: { xs: "70px", md: "120px" },
+                height: { xs: "38px", md: "48px" },
+                fontSize: { xs: "0.72rem", md: "0.875rem" },
+                px: { xs: 1, md: 2 },
                 borderRadius: "999px",
                 flexShrink: 0,
                 fontWeight: 700,
@@ -279,7 +283,7 @@ export default function Navbar({
               sx={{
                 display: "flex",
                 alignItems: "center",
-                gap: 1.2,
+                gap: { xs: 0.75, md: 1.2 },
                 height: "100%",
                 flexShrink: 0,
               }}
@@ -300,9 +304,11 @@ export default function Navbar({
                   color="inherit"
                   variant="contained"
                   sx={{
-                    minWidth: "180px",
-                    maxWidth: "220px",
-                    height: "48px",
+                    minWidth: { xs: "95px", sm: "130px", md: "180px" },
+                    maxWidth: { xs: "120px", sm: "160px", md: "220px" },
+                    height: { xs: "38px", md: "48px" },
+                    fontSize: { xs: "0.72rem", md: "0.875rem" },
+                    px: { xs: 1, md: 2 },
                     borderRadius: "999px",
                     whiteSpace: "nowrap",
                     overflow: "hidden",
@@ -324,21 +330,22 @@ export default function Navbar({
           <Box
             sx={{
               height: "100%",
-              width: "300px",
+              width: { xs: "auto", md: "300px" },
               display: "flex",
               alignItems: "center",
               justifyContent: "flex-end",
-              gap: 1.2,
+              gap: { xs: 0.5, md: 1.2 },
               flexShrink: 0,
             }}
           >
             <Button
               color="inherit"
-              startIcon={<AddIcon />}
               onClick={onAddCategory}
               sx={(theme) => ({
-                minWidth: "170px",
-                height: "48px",
+                minWidth: { xs: "38px", md: "170px" },
+                width: { xs: "38px", md: "auto" },
+                height: { xs: "38px", md: "48px" },
+                px: { xs: 0, md: 2 },
                 borderRadius: "999px",
                 fontWeight: 700,
                 backdropFilter: "blur(12px)",
@@ -356,7 +363,16 @@ export default function Navbar({
                 },
               })}
             >
-              Add Category
+              <AddIcon
+                sx={{
+                  fontSize: { xs: 20, md: 22 },
+                  flexShrink: 0,
+                }}
+              />
+
+              <Box sx={{ display: { xs: "none", md: "block" }, ml: 1 }}>
+                Add Category
+              </Box>
             </Button>
 
             <IconButton
@@ -367,8 +383,8 @@ export default function Navbar({
                   : "Switch to light mode"
               }
               sx={(theme) => ({
-                width: 48,
-                height: 48,
+                width: { xs: 38, md: 48 },
+                height: { xs: 38, md: 48 },
                 color: "text.primary",
                 backdropFilter: "blur(12px)",
                 background:
@@ -379,18 +395,25 @@ export default function Navbar({
             >
               {mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
             </IconButton>
+
             <PopupState variant="popover" popupId="user_menu">
               {(popupState) => {
                 return (
                   <>
-                    {" "}
                     <Avatar
-                      sx={{ bgcolor: deepOrange[500], cursor: "pointer" }}
+                      sx={{
+                        bgcolor: deepOrange[500],
+                        cursor: "pointer",
+                        width: { xs: 38, md: 40 },
+                        height: { xs: 38, md: 40 },
+                        fontSize: { xs: "0.9rem", md: "1rem" },
+                      }}
                       {...bindTrigger(popupState)}
                     >
-                      {user?.name[0].toUpperCase()}
+                      {user?.name?.[0]?.toUpperCase()}
                     </Avatar>
-                    <Menu {...bindMenu(popupState)}>
+
+                    <Menu {...bindMenu(popupState)} disableScrollLock>
                       <MenuItem onClick={popupState.close}>Profile</MenuItem>
                       <MenuItem onClick={popupState.close}>My account</MenuItem>
                       <MenuItem

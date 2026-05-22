@@ -312,13 +312,28 @@ function App() {
           update_application(draggedJob.id, update_data);
         }}
       >
-        <Container maxWidth={false} disableGutters sx={{ overflow: "visible" }}>
+        <Container
+          maxWidth={false}
+          disableGutters
+          sx={{
+            width: "100%",
+            maxWidth: "100vw",
+            minHeight: "100dvh",
+            overflowX: "hidden",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
           <Box
             className="App"
             sx={{
-              minHeight: "100vh",
+              width: "100%",
+              maxWidth: "1600px",
+              minHeight: "100dvh",
               color: "text.primary",
-              overflow: "visible",
+              overflowX: "hidden",
+              overflowY: "auto",
+              boxSizing: "border-box",
 
               scrollbarWidth: "none",
 
@@ -365,18 +380,25 @@ function App() {
                 display: "flex",
                 flexDirection: "row",
 
-                height: "calc(100vh - 88px)",
+                height: { xs: "100%", md: "calc(100dvh - 72px)" },
+                minHeight: {
+                  xs: "100%",
+                  md: "calc(100dvh - 72px)",
+                },
                 width: "100%",
+                maxWidth: "100%",
+                boxSizing: "border-box",
 
                 overflowX: "auto",
-                overflowY: "hidden",
+                overflowY: { xs: "auto", md: "hidden" },
 
-                px: 3,
-                py: 2.5,
+                px: { xs: 1, md: 3 },
+                py: { xs: 1.5, md: 2.5 },
 
-                gap: 2.5,
+                gap: { xs: 1.5, md: 2.5 },
 
-                alignItems: "flex-start",
+                alignItems: { xs: "center", md: "flex-start" },
+                justifyContent: "flex-start",
 
                 scrollbarWidth: "none",
 
