@@ -1,4 +1,4 @@
-# Job Application Tracker (Work in Progress - Not Production Ready)
+# Job Application Tracker 
 
 A Kanban-style full-stack job search tracker built to manage real job applications from wishlist to archive.
 
@@ -56,6 +56,7 @@ Applying for jobs across multiple platforms gets messy fast. I wanted a focused 
 ```text
 src/
 ├── components/
+├── pages/
 ├── services/
 ├── types/
 ├── utils/
@@ -72,6 +73,7 @@ backend/
 ├── services/
 ├── static/
 │   └── thumbnails/
+├── requirements.txt
 └── main.py
 
 screenshots/
