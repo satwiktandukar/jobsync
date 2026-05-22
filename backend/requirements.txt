@@ -4,7 +4,7 @@ sqlmodel
 sqlalchemy
 python-multipart
 pyjwt
-pwdlib
+pwdlib[argon2]
 python-dotenv
 pillow
 email-validator
