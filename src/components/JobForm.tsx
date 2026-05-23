@@ -38,6 +38,12 @@ const emptyForm = {
   salary: "",
   description: "",
   logo: "",
+  job_url: "",
+  employment_type: "",
+  work_mode: "",
+  source: "",
+  deadline: "",
+  applied_date: "",
 };
 
 const textFieldSx = {
@@ -112,6 +118,12 @@ export default function JobForm({
       category_id: category?.id ?? null,
       logo: data.logo.trim() || null,
       status: sectionToStatus[jobSection],
+      job_url: data.job_url.trim() || null,
+      employment_type: data.employment_type.trim() || null,
+      work_mode: data.work_mode.trim() || null,
+      source: data.source.trim() || null,
+      deadline: data.deadline.trim() || null,
+      applied_date: data.applied_date.trim() || null,
     };
 
     try {
@@ -193,13 +205,14 @@ export default function JobForm({
         }}
       >
         <Container
-          maxWidth="sm"
+          maxWidth="md"
           sx={{
             minHeight: "80dvh",
             maxHeight: "100dvh",
 
             display: "flex",
             alignItems: { xs: "flex-start", sm: "center" },
+            justifyContent: { xs: "flex-start", sm: "center" },
             flexDirection: "column",
             overflowY: "auto",
             overflowX: "auto",
@@ -231,7 +244,7 @@ export default function JobForm({
               }),
             })}
           >
-            <Stack spacing={3}>
+            <Stack spacing={2}>
               <Box>
                 <Typography
                   component="h2"
@@ -258,7 +271,13 @@ export default function JobForm({
               </Box>
 
               <Box component="form" onSubmit={handleSubmit}>
-                <Stack spacing={1.2}>
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+                    gap: 1.2,
+                  }}
+                >
                   <TextField
                     name="title"
                     label="Job title"
@@ -300,11 +319,77 @@ export default function JobForm({
                   />
 
                   <TextField
+                    name="job_url"
+                    label="Job URL"
+                    value={data.job_url}
+                    onChange={handleChange}
+                    sx={textFieldSx}
+                    fullWidth
+                  />
+
+                  <TextField
+                    name="source"
+                    label="Source"
+                    value={data.source}
+                    onChange={handleChange}
+                    sx={textFieldSx}
+                    fullWidth
+                  />
+
+                  <TextField
+                    name="employment_type"
+                    label="Employment type"
+                    value={data.employment_type}
+                    onChange={handleChange}
+                    sx={textFieldSx}
+                    fullWidth
+                  />
+
+                  <TextField
+                    name="work_mode"
+                    label="Work mode"
+                    value={data.work_mode}
+                    onChange={handleChange}
+                    sx={textFieldSx}
+                    fullWidth
+                  />
+
+                  <TextField
+                    name="deadline"
+                    label="Deadline"
+                    type="date"
+                    value={data.deadline}
+                    onChange={handleChange}
+                    sx={textFieldSx}
+                    fullWidth
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  />
+                  {jobSection !== "Wish List" ? (
+                    <TextField
+                      name="applied_date"
+                      label="Applied date"
+                      type="date"
+                      value={data.applied_date}
+                      onChange={handleChange}
+                      sx={textFieldSx}
+                      fullWidth
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                    />
+                  ) : null}
+
+                  <TextField
                     name="description"
                     label="Description"
                     value={data.description}
                     onChange={handleChange}
-                    sx={textFieldSx}
+                    sx={{
+                      ...textFieldSx,
+                      gridColumn: { xs: "auto", sm: "1 / -1" },
+                    }}
                     fullWidth
                     multiline
                     rows={2}
@@ -312,6 +397,7 @@ export default function JobForm({
 
                   <Box
                     sx={(theme) => ({
+                      gridColumn: { xs: "auto", sm: "1 / -1" },
                       display: "flex",
                       alignItems: { xs: "stretch", sm: "center" },
                       flexDirection: { xs: "column", sm: "row" },
@@ -403,6 +489,7 @@ export default function JobForm({
                     type="submit"
                     fullWidth
                     sx={{
+                      gridColumn: { xs: "auto", sm: "1 / -1" },
                       mt: 1,
                       py: 1.2,
                       borderRadius: "10px",
@@ -428,6 +515,7 @@ export default function JobForm({
                     variant="text"
                     onClick={handleClose}
                     sx={{
+                      gridColumn: { xs: "auto", sm: "1 / -1" },
                       borderRadius: "10px",
                       textTransform: "none",
                       fontWeight: 600,
@@ -436,7 +524,7 @@ export default function JobForm({
                   >
                     Cancel
                   </Button>
-                </Stack>
+                </Box>
               </Box>
             </Stack>
           </Paper>

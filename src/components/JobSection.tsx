@@ -82,6 +82,7 @@ export default function JobSection({
         width={"100%"}
         sx={{
           display: "flex",
+
           justifyContent: "center",
           alignItems: "center",
           mt: "30px",
@@ -95,7 +96,7 @@ export default function JobSection({
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          alignItems: "flex-start",
+          alignItems: "center",
           pb: "10px",
         }}
       >

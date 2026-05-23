@@ -48,26 +48,35 @@ export default function LoginContent() {
         }}
       >
         <Box
-          component="img"
-          src="/favicon.jpg"
-          alt="JobSync logo"
           sx={{
-            width: 50,
-            height: 50,
-            alignSelf: "center",
-            borderRadius: 50,
-          }}
-        />
-        <Typography
-          variant="h3"
-          sx={{
-            fontWeight: 700,
-            letterSpacing: "-0.04em",
-            mb: 1,
+            alignItems: "center",
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
           }}
         >
-          JobSync
-        </Typography>
+          <Box
+            component="img"
+            src="/favicon.png"
+            alt="JobSync logo"
+            sx={{
+              width: 70,
+              height: 70,
+              alignSelf: "center",
+              borderRadius: 50,
+            }}
+          />
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: 700,
+              letterSpacing: "-0.04em",
+              mb: 1,
+            }}
+          >
+            JobSync
+          </Typography>{" "}
+        </Box>
         {items.map((item, index) => (
           <Stack key={index} direction="row" sx={{ gap: 2 }}>
             {item.icon}

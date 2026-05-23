@@ -33,6 +33,12 @@ function jobToForm(job: Job) {
     description: job.description ?? "",
     category_id: job.category_id?.toString() ?? "",
     logo: job.logo ?? "",
+    job_url: job.job_url ?? "",
+    employment_type: job.employment_type ?? "",
+    work_mode: job.work_mode ?? "",
+    source: job.source ?? "",
+    deadline: job.deadline ?? "",
+    applied_date: job.applied_date ?? "",
   };
 }
 
@@ -105,6 +111,12 @@ export default function JobWindow({
       description: data.description.trim() || null,
       category_id: data.category_id === "" ? null : Number(data.category_id),
       logo: data.logo.trim() || null,
+      job_url: data.job_url.trim() || null,
+      employment_type: data.employment_type.trim() || null,
+      work_mode: data.work_mode.trim() || null,
+      source: data.source.trim() || null,
+      deadline: data.deadline.trim() || null,
+      applied_date: data.applied_date.trim() || null,
     };
 
     try {
@@ -145,13 +157,15 @@ export default function JobWindow({
         }}
       >
         <Container
-          maxWidth="sm"
+          maxWidth="md"
           sx={{
             minHeight: "80dvh",
             maxHeight: "100dvh",
 
             display: "flex",
             alignItems: { xs: "flex-start", sm: "center" },
+            justifyContent: { xs: "flex-start", sm: "center" },
+
             flexDirection: "column",
             overflowY: "auto",
             overflowX: "hidden",
@@ -183,7 +197,7 @@ export default function JobWindow({
               }),
             })}
           >
-            <Stack spacing={3}>
+            <Stack spacing={2}>
               <Box>
                 <Typography
                   component="h2"
@@ -211,7 +225,13 @@ export default function JobWindow({
               </Box>
 
               <Box component="form" onSubmit={handleSubmit}>
-                <Stack spacing={1.2}>
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+                    gap: 1.2,
+                  }}
+                >
                   <TextField
                     name="title"
                     label="Job title"
@@ -220,7 +240,9 @@ export default function JobWindow({
                     sx={textFieldSx}
                     fullWidth
                     required
-                    disabled={!isEditing}
+                    InputProps={{
+                      readOnly: !isEditing,
+                    }}
                   />
 
                   <TextField
@@ -231,7 +253,9 @@ export default function JobWindow({
                     sx={textFieldSx}
                     fullWidth
                     required
-                    disabled={!isEditing}
+                    InputProps={{
+                      readOnly: !isEditing,
+                    }}
                   />
 
                   <TextField
@@ -242,7 +266,9 @@ export default function JobWindow({
                     sx={textFieldSx}
                     fullWidth
                     required
-                    disabled={!isEditing}
+                    InputProps={{
+                      readOnly: !isEditing,
+                    }}
                   />
 
                   <TextField
@@ -253,19 +279,125 @@ export default function JobWindow({
                     onChange={handleChange}
                     sx={textFieldSx}
                     fullWidth
-                    disabled={!isEditing}
+                    InputProps={{
+                      readOnly: !isEditing,
+                    }}
                   />
+
+                  <TextField
+                    name="job_url"
+                    label="Job URL"
+                    value={data.job_url}
+                    onChange={handleChange}
+                    sx={{
+                      ...textFieldSx,
+                      cursor:
+                        !isEditing && data.job_url ? "pointer" : "default",
+                      "& .MuiInputBase-input": {
+                        cursor:
+                          !isEditing && data.job_url ? "pointer" : "default",
+                      },
+                    }}
+                    fullWidth
+                    InputProps={{
+                      readOnly: !isEditing,
+                    }}
+                    onClick={() => {
+                      if (!isEditing && data.job_url) {
+                        window.open(
+                          data.job_url,
+                          "_blank",
+                          "noopener,noreferrer",
+                        );
+                      }
+                    }}
+                  />
+
+                  <TextField
+                    name="source"
+                    label="Source"
+                    value={data.source}
+                    onChange={handleChange}
+                    sx={textFieldSx}
+                    fullWidth
+                    InputProps={{
+                      readOnly: !isEditing,
+                    }}
+                  />
+
+                  <TextField
+                    name="employment_type"
+                    label="Employment type"
+                    value={data.employment_type}
+                    onChange={handleChange}
+                    sx={textFieldSx}
+                    fullWidth
+                    InputProps={{
+                      readOnly: !isEditing,
+                    }}
+                  />
+
+                  <TextField
+                    name="work_mode"
+                    label="Work mode"
+                    value={data.work_mode}
+                    onChange={handleChange}
+                    sx={textFieldSx}
+                    fullWidth
+                    InputProps={{
+                      readOnly: !isEditing,
+                    }}
+                  />
+
+                  <TextField
+                    name="deadline"
+                    label="Deadline"
+                    type="date"
+                    value={data.deadline}
+                    onChange={handleChange}
+                    sx={textFieldSx}
+                    fullWidth
+                    InputProps={{
+                      readOnly: !isEditing,
+                    }}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  />
+
+                  {job.status !== "wishlist" ? (
+                    <TextField
+                      name="applied_date"
+                      label="Applied date"
+                      type="date"
+                      value={data.applied_date}
+                      onChange={handleChange}
+                      sx={textFieldSx}
+                      fullWidth
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      InputProps={{
+                        readOnly: !isEditing,
+                      }}
+                    />
+                  ) : null}
 
                   <TextField
                     name="description"
                     label="Description"
                     value={data.description}
                     onChange={handleChange}
-                    sx={textFieldSx}
+                    sx={{
+                      ...textFieldSx,
+                      gridColumn: { xs: "auto", sm: "1 / -1" },
+                    }}
                     fullWidth
                     multiline
                     rows={2}
-                    disabled={!isEditing}
+                    InputProps={{
+                      readOnly: !isEditing,
+                    }}
                   />
 
                   <TextField
@@ -275,7 +407,10 @@ export default function JobWindow({
                     label="Category"
                     value={data.category_id}
                     onChange={handleChange}
-                    sx={textFieldSx}
+                    sx={{
+                      ...textFieldSx,
+                      gridColumn: { xs: "auto", sm: "1 / -1" },
+                    }}
                     disabled={!isEditing}
                   >
                     <MenuItem value="">No category</MenuItem>
@@ -292,6 +427,7 @@ export default function JobWindow({
                     type="submit"
                     fullWidth
                     sx={{
+                      gridColumn: { xs: "auto", sm: "1 / -1" },
                       mt: 1,
                       py: 1.2,
                       borderRadius: "10px",
@@ -325,6 +461,7 @@ export default function JobWindow({
                     variant="text"
                     onClick={handleClose}
                     sx={{
+                      gridColumn: { xs: "auto", sm: "1 / -1" },
                       borderRadius: "10px",
                       textTransform: "none",
                       fontWeight: 600,
@@ -333,7 +470,7 @@ export default function JobWindow({
                   >
                     Cancel
                   </Button>
-                </Stack>
+                </Box>
               </Box>
             </Stack>
           </Paper>

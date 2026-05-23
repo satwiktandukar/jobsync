@@ -117,6 +117,12 @@ async def create_application(
         logo=data.logo,
         status=data.status,
         user_id=current_user.id,
+        job_url=data.job_url,
+        employment_type=data.employment_type,
+        work_mode=data.work_mode,
+        source=data.source,
+        deadline=data.deadline,
+        applied_date=data.applied_date,
     )
 
     session.add(application)
@@ -176,6 +182,24 @@ async def update_application(
 
     if data.status is not None:
         job_application.status = data.status
+
+    if data.job_url is not None:
+        job_application.job_url = data.job_url
+
+    if data.employment_type is not None:
+        job_application.employment_type = data.employment_type
+
+    if data.work_mode is not None:
+        job_application.work_mode = data.work_mode
+
+    if data.source is not None:
+        job_application.source = data.source
+
+    if data.deadline is not None:
+        job_application.deadline = data.deadline
+
+    if data.applied_date is not None:
+        job_application.applied_date = data.applied_date
 
     session.add(job_application)
     session.commit()
@@ -353,4 +377,3 @@ async def login_for_access_token(
 @app.get("/user/")
 async def read_users_me(current_user: CurrentUserDep):
     return ({"name": current_user.name, "username": current_user.username, "email": current_user.email})
-

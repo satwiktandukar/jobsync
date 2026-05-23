@@ -11,6 +11,8 @@ import {
 
 export const BASE_URL = "https://jobsync-ou34.onrender.com";
 
+// export const BASE_URL = "http://localhost:8000";
+
 const ACCESS_TOKEN_KEY = "jwt-token";
 const TOKEN_TYPE_KEY = "token-type";
 

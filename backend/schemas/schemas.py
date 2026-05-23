@@ -11,6 +11,12 @@ class JobApplicationCreateSchema(BaseModel):
     category_id: int | None = None
     logo: str | None = None
     status: ApplicationStatus
+    job_url: str | None = None
+    employment_type: str | None = None
+    work_mode: str | None = None
+    source: str | None = None
+    deadline: str | None = None
+    applied_date: str | None = None
 
 
 class JobApplicationUpdateSchema(BaseModel):
@@ -22,6 +28,12 @@ class JobApplicationUpdateSchema(BaseModel):
     category_id: int | None = None
     logo: str | None = None
     status: ApplicationStatus | None = None
+    job_url: str | None = None
+    employment_type: str | None = None
+    work_mode: str | None = None
+    source: str | None = None
+    deadline: str | None = None
+    applied_date: str | None = None
 
 
 class JobApplicationSchema(BaseModel):
@@ -34,6 +46,12 @@ class JobApplicationSchema(BaseModel):
     category_id: int | None
     logo: str | None
     status: ApplicationStatus
+    job_url: str | None
+    employment_type: str | None
+    work_mode: str | None
+    source: str | None
+    deadline: str | None
+    applied_date: str | None
 
 
 class CategoryCreateSchema(BaseModel):
@@ -62,10 +80,11 @@ class UserSchema(BaseModel):
     name: str
     email: str
 
+
 class Token(BaseModel):
     access_token: str
     token_type: str
 
+
 class TokenData(BaseModel):
     username: str | None = None
-

@@ -21,6 +21,13 @@ export type Job = {
   logo: string | null;
 
   status: ApplicationStatus;
+
+  job_url: string | null;
+  employment_type: string | null;
+  work_mode: string | null;
+  source: string | null;
+  deadline: string | null;
+  applied_date: string | null;
 };
 
 export type JobCreate = Omit<Job, "id">;

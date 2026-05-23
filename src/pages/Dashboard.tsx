@@ -58,6 +58,12 @@ function App() {
     category_id: null,
     logo: "",
     status: "wishlist",
+    job_url: null,
+    employment_type: null,
+    work_mode: null,
+    source: null,
+    deadline: null,
+    applied_date: null,
   };
 
   const [loading, setLoading] = useState(true);

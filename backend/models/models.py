@@ -36,3 +36,9 @@ class JobApplication(SQLModel, table=True):
     logo: str | None = None
     status: ApplicationStatus = Field(default=ApplicationStatus.wishlist)
     user_id: int = Field(foreign_key="user.id")
+    job_url: str | None = None
+    employment_type: str | None = None
+    work_mode: str | None = None
+    source: str | None = None
+    deadline: str | None = None
+    applied_date: str | None = None
