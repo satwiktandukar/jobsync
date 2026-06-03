@@ -24,8 +24,8 @@ const Card = styled(MuiCard)(({ theme }) => ({
   gap: theme.spacing(2),
   borderRadius: "24px",
 
-  backgroundColor: "rgba(255, 255, 255, 0.68)",
-  backdropFilter: "blur(18px)",
+  backgroundColor: "rgba(255, 255, 255, 1.98)",
+  // backdropFilter: "blur(2px)",
   border: "1px solid rgba(255, 255, 255, 0.5)",
   boxShadow: "0 24px 80px rgba(36, 28, 95, 0.24)",
 
