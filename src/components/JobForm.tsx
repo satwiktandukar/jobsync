@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Container,
+  MenuItem,
   Modal,
   Paper,
   Snackbar,
@@ -18,6 +19,7 @@ import { useState } from "react";
 
 import type { Job, JobCreate, Category } from "../types/Job";
 import { sectionToStatus, type SectionName } from "../utils/jobStatus";
+import { EMPLOYMENT_TYPES, SOURCES, WORK_MODES } from "../utils/jobOptions";
 import {
   create_application,
   upload_logo_image,
@@ -47,9 +49,7 @@ const emptyForm = {
 };
 
 const textFieldSx = {
-  "& .MuiOutlinedInput-root": {
-    borderRadius: "12px",
-  },
+  "& .MuiOutlinedInput-root": { borderRadius: "12px" },
 };
 
 const VisuallyHiddenInput = styled("input")({
@@ -80,10 +80,7 @@ export default function JobForm({
   });
 
   function handleSnackbarClose() {
-    setSnackbar((prev) => ({
-      ...prev,
-      open: false,
-    }));
+    setSnackbar((prev) => ({ ...prev, open: false }));
   }
 
   function handleClose() {
@@ -95,11 +92,7 @@ export default function JobForm({
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = event.target;
-
-    setData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    setData((prevData) => ({ ...prevData, [name]: value }));
   };
 
   const resetForm = () => setData(emptyForm);
@@ -128,65 +121,33 @@ export default function JobForm({
 
     try {
       const createdJob = await create_application(job);
-
       addJob(createdJob);
       resetForm();
       close();
-
-      setSnackbar({
-        open: true,
-        message: "New job created successfully.",
-        severity: "success",
-      });
+      setSnackbar({ open: true, message: "New job created successfully.", severity: "success" });
     } catch (error) {
       console.error(error);
-
-      setSnackbar({
-        open: true,
-        message: "Failed to create job.",
-        severity: "error",
-      });
+      setSnackbar({ open: true, message: "Failed to create job.", severity: "error" });
     }
   }
 
   const uploadImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-
     if (!file) return;
 
     const allowedTypes = ["image/png", "image/jpeg", "image/gif"];
-
     if (!allowedTypes.includes(file.type)) {
-      setSnackbar({
-        open: true,
-        message: "Only PNG, JPEG, and GIF images are allowed.",
-        severity: "error",
-      });
-
+      setSnackbar({ open: true, message: "Only PNG, JPEG, and GIF images are allowed.", severity: "error" });
       return;
     }
 
     try {
       const logo_url = await upload_logo_image(file);
-
-      setData((prev) => ({
-        ...prev,
-        logo: logo_url,
-      }));
-
-      setSnackbar({
-        open: true,
-        message: "Logo uploaded successfully.",
-        severity: "success",
-      });
+      setData((prev) => ({ ...prev, logo: logo_url }));
+      setSnackbar({ open: true, message: "Logo uploaded successfully.", severity: "success" });
     } catch (error) {
       console.error(error);
-
-      setSnackbar({
-        open: true,
-        message: "Failed to upload logo.",
-        severity: "error",
-      });
+      setSnackbar({ open: true, message: "Failed to upload logo.", severity: "error" });
     }
   };
 
@@ -209,7 +170,6 @@ export default function JobForm({
           sx={{
             minHeight: "80dvh",
             maxHeight: "100dvh",
-
             display: "flex",
             alignItems: { xs: "flex-start", sm: "center" },
             justifyContent: { xs: "flex-start", sm: "center" },
@@ -217,12 +177,8 @@ export default function JobForm({
             overflowY: "auto",
             overflowX: "auto",
             boxSizing: "border-box",
-
             scrollbarWidth: "none",
-
-            "&::-webkit-scrollbar": {
-              display: "none",
-            },
+            "&::-webkit-scrollbar": { display: "none" },
           }}
         >
           <Paper
@@ -231,12 +187,10 @@ export default function JobForm({
               width: "100%",
               p: { xs: 2.5, sm: 4 },
               borderRadius: "24px",
-
               backgroundColor: "rgba(255, 255, 255, 0.72)",
               backdropFilter: "blur(18px)",
               border: "1px solid rgba(255, 255, 255, 0.5)",
               boxShadow: "0 24px 80px rgba(36, 28, 95, 0.24)",
-
               ...theme.applyStyles("dark", {
                 backgroundColor: "rgba(17, 15, 35, 0.86)",
                 border: "1px solid rgba(255, 255, 255, 0.08)",
@@ -249,22 +203,11 @@ export default function JobForm({
                 <Typography
                   component="h2"
                   variant="h4"
-                  sx={{
-                    fontWeight: 700,
-                    letterSpacing: "-0.03em",
-                    color: "text.primary",
-                  }}
+                  sx={{ fontWeight: 700, letterSpacing: "-0.03em", color: "text.primary" }}
                 >
                   Add job
                 </Typography>
-
-                <Typography
-                  sx={{
-                    mt: 0.75,
-                    color: "text.secondary",
-                    fontSize: "0.95rem",
-                  }}
-                >
+                <Typography sx={{ mt: 0.75, color: "text.secondary", fontSize: "0.95rem" }}>
                   Create a new job in {jobSection}
                   {category ? ` under ${category.title}.` : "."}
                 </Typography>
@@ -328,31 +271,49 @@ export default function JobForm({
                   />
 
                   <TextField
+                    select
                     name="source"
                     label="Source"
                     value={data.source}
                     onChange={handleChange}
                     sx={textFieldSx}
                     fullWidth
-                  />
+                  >
+                    <MenuItem value="">None</MenuItem>
+                    {SOURCES.map((s) => (
+                      <MenuItem key={s} value={s}>{s}</MenuItem>
+                    ))}
+                  </TextField>
 
                   <TextField
+                    select
                     name="employment_type"
                     label="Employment type"
                     value={data.employment_type}
                     onChange={handleChange}
                     sx={textFieldSx}
                     fullWidth
-                  />
+                  >
+                    <MenuItem value="">None</MenuItem>
+                    {EMPLOYMENT_TYPES.map((t) => (
+                      <MenuItem key={t} value={t}>{t}</MenuItem>
+                    ))}
+                  </TextField>
 
                   <TextField
+                    select
                     name="work_mode"
                     label="Work mode"
                     value={data.work_mode}
                     onChange={handleChange}
                     sx={textFieldSx}
                     fullWidth
-                  />
+                  >
+                    <MenuItem value="">None</MenuItem>
+                    {WORK_MODES.map((m) => (
+                      <MenuItem key={m} value={m}>{m}</MenuItem>
+                    ))}
+                  </TextField>
 
                   <TextField
                     name="deadline"
@@ -362,10 +323,9 @@ export default function JobForm({
                     onChange={handleChange}
                     sx={textFieldSx}
                     fullWidth
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
+                    InputLabelProps={{ shrink: true }}
                   />
+
                   {jobSection !== "Wish List" ? (
                     <TextField
                       name="applied_date"
@@ -375,9 +335,7 @@ export default function JobForm({
                       onChange={handleChange}
                       sx={textFieldSx}
                       fullWidth
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
+                      InputLabelProps={{ shrink: true }}
                     />
                   ) : null}
 
@@ -395,6 +353,7 @@ export default function JobForm({
                     rows={2}
                   />
 
+                  {/* Logo upload */}
                   <Box
                     sx={(theme) => ({
                       gridColumn: { xs: "auto", sm: "1 / -1" },
@@ -406,7 +365,6 @@ export default function JobForm({
                       borderRadius: "16px",
                       backgroundColor: "rgba(255, 255, 255, 0.42)",
                       border: "1px solid rgba(255, 255, 255, 0.45)",
-
                       ...theme.applyStyles("dark", {
                         backgroundColor: "rgba(255, 255, 255, 0.04)",
                         border: "1px solid rgba(255, 255, 255, 0.08)",
@@ -419,11 +377,9 @@ export default function JobForm({
                       startIcon={<CloudUploadIcon />}
                       sx={{
                         borderRadius: "10px",
-                        textTransform: "none",
                         fontWeight: 700,
                         borderColor: "hsl(265, 79%, 52%)",
                         color: "hsl(265, 79%, 52%)",
-
                         "&:hover": {
                           borderColor: "hsl(265, 75%, 45%)",
                           backgroundColor: "rgba(126, 34, 206, 0.08)",
@@ -440,45 +396,22 @@ export default function JobForm({
 
                     {data.logo ? (
                       <>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            flex: 1,
-                            color: "success.main",
-                            fontWeight: 600,
-                          }}
-                        >
+                        <Typography variant="body2" sx={{ flex: 1, color: "success.main", fontWeight: 600 }}>
                           Upload successful
                         </Typography>
-
                         <Button
                           variant="outlined"
                           color="error"
                           size="small"
                           startIcon={<DeleteOutlineIcon />}
-                          onClick={() =>
-                            setData((prev) => ({
-                              ...prev,
-                              logo: "",
-                            }))
-                          }
-                          sx={{
-                            borderRadius: "10px",
-                            textTransform: "none",
-                            fontWeight: 700,
-                          }}
+                          onClick={() => setData((prev) => ({ ...prev, logo: "" }))}
+                          sx={{ borderRadius: "10px", fontWeight: 700 }}
                         >
                           Remove
                         </Button>
                       </>
                     ) : (
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          flex: 1,
-                          color: "text.secondary",
-                        }}
-                      >
+                      <Typography variant="body2" sx={{ flex: 1, color: "text.secondary" }}>
                         PNG, JPEG, or GIF only.
                       </Typography>
                     )}
@@ -493,13 +426,10 @@ export default function JobForm({
                       mt: 1,
                       py: 1.2,
                       borderRadius: "10px",
-                      textTransform: "none",
                       fontWeight: 700,
                       fontSize: "1rem",
-
                       backgroundColor: "hsl(265, 79%, 52%)",
                       boxShadow: "0 10px 28px rgba(126, 34, 206, 0.28)",
-
                       "&:hover": {
                         backgroundColor: "hsl(265, 75%, 45%)",
                         boxShadow: "0 12px 32px rgba(126, 34, 206, 0.34)",
@@ -517,7 +447,6 @@ export default function JobForm({
                     sx={{
                       gridColumn: { xs: "auto", sm: "1 / -1" },
                       borderRadius: "10px",
-                      textTransform: "none",
                       fontWeight: 600,
                       color: "text.secondary",
                     }}
@@ -535,16 +464,9 @@ export default function JobForm({
         open={snackbar.open}
         autoHideDuration={3000}
         onClose={handleSnackbarClose}
-        anchorOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        <Alert
-          onClose={handleSnackbarClose}
-          severity={snackbar.severity}
-          variant="filled"
-        >
+        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} variant="filled">
           {snackbar.message}
         </Alert>
       </Snackbar>
